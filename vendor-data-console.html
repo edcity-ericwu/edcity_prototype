@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資料存取控制台 — 供應商側視圖（示意）</title>
+<!-- Site-wide typeface (2026-07-31): Chiron GoRound TC, a rounded
+     Traditional Chinese sans built on Source Han Sans/Chiron Hei HK,
+     replacing the plain system-font stack. Falls back to the previous
+     stack (PingFang TC / Microsoft JhengHei / Noto Sans TC / system) if
+     the network font fails to load. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ec-blue:#008BD1;--ec-blue-dark:#0072ab;--ec-red:#ED1A2E;--ec-green:#00AC6C;
+    --ec-maroon:#7B2539;--ec-amber:#F5A623;--ec-purple:#7C5CDB;
+    --ink:#1e2a35;--ink-2:#55636f;--ink-3:#8a97a3;--line:#e6ebf0;--bg:#f1f2f8;font-size:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Chiron GoRound TC","PingFang TC","Microsoft JhengHei","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;}
+
+  /* System color-coding: same maroon vendor-side identity as vendor-portal.html —
+   * this page is also outside EdCity.ai, on the vendor's own system, so it should
+   * read as the same "space" as the vendor portal, not blend into the SMS/EdData
+   * blue/purple pair. */
+  .sys-sidebar{width:248px;flex-shrink:0;background:#4a2029;color:#dfe8ef;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;border-top:4px solid var(--ec-maroon);}
+  .sys-sidebar .sh-label{padding:20px 16px 12px;font-size:.66rem;font-weight:700;letter-spacing:normal;color:#f0abb8;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08);}
+  .sys-sidebar .role-tag{display:inline-flex;align-items:center;gap:6px;font-size:.62rem;font-weight:700;letter-spacing:normal;text-transform:none;border-radius:99px;padding:4px 10px;margin:10px 16px 0;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#dfe8ef;white-space:nowrap;}
+  .sys-nav{padding:10px 8px;flex:1;}
+  .sys-nav a{display:block;padding:9px 12px;border-radius:8px;color:#c3d0da;text-decoration:none;font-size:.8rem;margin-bottom:2px;}
+  .sys-nav a:hover{background:rgba(255,255,255,.06);}
+  .sys-nav a.active{background:rgba(255,255,255,.12);color:#fff;font-weight:700;}
+  .sys-sidebar-foot{padding:12px 16px;border-top:1px solid rgba(255,255,255,.08);}
+  .sys-sidebar-foot a{font-size:.74rem;color:#93a4b1;text-decoration:none;}
+  .sys-sidebar-foot a:hover{color:#fff;}
+  .sys-main{flex:1;min-width:0;}
+
+  /* same "external actor" shell as vendor-portal.html — this is outside EdCity.ai, on the vendor's own system */
+  .role-banner{background:#5a2731;color:#dfe8ef;font-size:.7rem;font-weight:700;letter-spacing:normal;
+    padding:9px 26px;position:sticky;top:0;z-index:50;}
+  .topbar{background:#fff;border-bottom:3px solid var(--ec-maroon);padding:14px 26px;display:flex;align-items:center;gap:14px;}
+  .topbar img{height:30px;width:auto;}
+  .topbar .divider{color:var(--line);}
+  .topbar .portal-name{font-size:.85rem;font-weight:700;color:var(--ec-maroon);}
+  .topbar .portal-name small{display:block;font-size:.64rem;color:var(--ink-3);font-weight:500;}
+  .topbar .who{margin-left:auto;display:flex;align-items:center;gap:9px;font-size:.8rem;color:var(--ink-2);}
+  .topbar .who .avatar{width:32px;height:32px;border-radius:8px;background:var(--ec-green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;}
+
+  .wrap{max-width:840px;margin:0 auto;padding:26px 20px 90px;}
+  .ribbon{display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:700;
+    color:#b91c1c;background:#fee2e2;border:1px solid #f5c6c6;border-radius:99px;padding:5px 14px;margin-bottom:16px;}
+  h1{font-size:1.8rem;font-weight:800;color:#5a2731;}
+  .hero{margin-bottom:24px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .sub{font-size:.82rem;color:var(--ink-2);margin:6px 0 0;max-width:48em;line-height:1.6;}
+
+  .foundation{
+    background:#fff;border-left:4px solid var(--ec-maroon);border-radius:8px;padding:12px 16px;
+    font-size:.78rem;color:var(--ink-2);line-height:1.7;margin-bottom:20px;max-width:58em;
+  }
+  .foundation b{color:var(--ink);}
+
+  h2{font-size:.92rem;font-weight:700;margin:24px 0 12px;}
+
+  /* grant summary — what was received, read-only from the vendor's side */
+  .grant-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+  .grant-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 0;border-top:1px solid #f2f6f8;font-size:.82rem;}
+  .grant-row:first-child{border-top:none;}
+  .grant-row .lbl{width:130px;flex-shrink:0;font-size:.7rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:normal;}
+  .grant-row b{font-size:.85rem;}
+  .tier-badge{font-size:.68rem;font-weight:700;border-radius:99px;padding:4px 12px;color:var(--ec-blue-dark);background:#e6f4fb;border:1px solid #c4e5f5;}
+  .readonly-note{
+    margin-top:12px;background:#f5f8fa;border:1px solid var(--line);border-radius:9px;padding:9px 13px;
+    font-size:.72rem;color:var(--ink-3);line-height:1.6;
+  }
+
+  /* provisioned accounts */
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  th,td{text-align:left;padding:11px 16px;font-size:.8rem;border-bottom:1px solid var(--line);}
+  th{font-size:.68rem;letter-spacing:normal;color:var(--ink-3);font-weight:600;background:#fafcfd;}
+  tr:last-child td{border-bottom:none;}
+  .chip{font-size:.64rem;font-weight:700;border-radius:99px;padding:3px 9px;display:inline-block;}
+  .chip.ok{color:var(--ec-green);background:#effaf5;border:1px solid #bfe8d7;}
+  .chip.masked{color:var(--ink-3);background:#f5f8fa;border:1px solid var(--line);}
+  .field-masked{color:var(--ink-3);font-style:italic;}
+
+  /* sync log */
+  .sync-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .sync-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid #f2f6f8;font-size:.79rem;color:var(--ink-2);line-height:1.6;}
+  .sync-row:first-child{border-top:none;}
+  .sync-row .s-ic{flex-shrink:0;}
+  .sync-row .s-time{font-size:.68rem;color:var(--ink-3);margin-left:auto;white-space:nowrap;padding-left:10px;}
+  .sync-actions{margin-top:14px;display:flex;gap:9px;}
+  .btn{border:none;border-radius:10px;padding:10px 17px;font-size:.79rem;font-weight:700;cursor:pointer;font-family:inherit;background:var(--ec-blue);color:#fff;transition:background .15s ease;}
+  .btn:not(.ghost):hover{background:var(--ec-blue-dark);}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink-2);font-weight:600;}
+
+  .revoke-note{
+    margin-top:16px;background:#fff5f5;border:1px solid #f5c6c6;border-radius:10px;padding:11px 14px;
+    font-size:.76rem;color:#991b1b;line-height:1.65;
+  }
+
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--ink-2);text-decoration:none;margin-bottom:14px;}
+  .back-link:hover{color:var(--ec-blue-dark);}
+
+  .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.78rem;padding:9px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;}
+  .toast.show{opacity:.94;}
+  footer.note{margin-top:36px;font-size:.68rem;color:var(--ink-3);text-align:center;line-height:1.7;}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;flex-wrap:wrap;}
+  .tab-btn{border:none;background:none;font-family:inherit;font-size:.82rem;font-weight:600;color:var(--ink-3);
+    padding:10px 4px;margin-right:22px;cursor:pointer;border-bottom:2px solid transparent;}
+  .tab-btn.active{color:var(--ec-blue-dark);border-bottom-color:var(--ec-blue);}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+</style>
+</head>
+<body>
+
+<aside class="sys-sidebar">
+  <div class="sh-label">供應商側系統</div>
+  <div class="role-tag">🏢 供應商層級 · 智寫科技視圖</div>
+  <nav class="sys-nav">
+    <a href="vendor-portal.html">📈 EdMarket 認證進度</a>
+    <a href="vendor-data-console.html" class="active">🔓 資料存取控制台</a>
+  </nav>
+  <div class="sys-sidebar-foot">
+    <a href="index.html">← 返回 EdCity.ai</a>
+  </div>
+</aside>
+
+<div class="sys-main">
+<div class="role-banner">外部 — 供應商資料存取（學校核准後的供應商視圖）</div>
+<div class="topbar">
+  <img src="edcity_logo.svg" alt="香港教育城 EdCity">
+  <span class="divider">|</span>
+  <span class="portal-name">資料存取控制台<small>智寫科技 · 供應商系統（非教育城介面）</small></span>
+  <div class="who"><div class="avatar">智</div>智寫科技 · 供應商帳戶</div>
+</div>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="ribbon">🔴 待決策 · 此畫面示意學校批出存取權後，供應商系統實際接收與使用資料的方式——架構方向，尚未承諾建置</div>
+    <h1>資料存取控制台</h1>
+    <div class="sub">這裏顯示的一切都<b>由學校的供應商資料存取審批（現稱 EdData）批出</b>，你不能在此申請更多存取範圍或層級——要擴大範圍，須回到學校重新審批。</div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="grant" onclick="showTab('grant')">已核准的資料存取</button>
+    <button class="tab-btn" data-tab="accounts" onclick="showTab('accounts')">已建立的帳戶</button>
+    <button class="tab-btn" data-tab="sync" onclick="showTab('sync')">名冊同步記錄</button>
+  </div>
+
+  <section class="tab-pane active" data-pane="grant">
+    <div class="grant-card">
+      <div class="grant-row"><span class="lbl">學校</span><b>（示範）中學</b></div>
+      <div class="grant-row"><span class="lbl">組別範圍</span><b>支援組（2 人）· 中二乙班</b></div>
+      <div class="grant-row"><span class="lbl">資料層級</span><span class="tier-badge">Tier 1 · 基本資料</span></div>
+      <div class="grant-row"><span class="lbl">核准人</span><b>馮 Sir</b>（資訊科技統籌 · 供應商資料存取審批）</div>
+      <div class="grant-row"><span class="lbl">生效日期</span><b>2026-07-21</b></div>
+      <div class="readonly-note">ℹ️ 以上資料透過 API 由學校的供應商資料存取審批同步而來，非供應商自行輸入。如需查看核准經過，請見學校端的存取審批記錄（校方內部畫面，供應商不可見）。</div>
+    </div>
+  </section>
+
+  <section class="tab-pane" data-pane="accounts">
+    <table>
+      <thead><tr><th>學生</th><th>班別</th><th>對應組別（本系統）</th><th>狀態</th></tr></thead>
+      <tbody id="acctTbody"></tbody>
+    </table>
+    <div class="readonly-note" style="margin-top:12px;">目前層級為 <b>Tier 1 · 基本資料</b>，只提供姓名與班別；學號、聯絡方式等進一步資料維持遮蔽狀態，除非學校日後批出更高層級。</div>
+  </section>
+
+  <section class="tab-pane" data-pane="sync">
+    <div class="sync-card">
+      <div id="syncList"></div>
+      <div class="sync-actions">
+        <button class="btn" onclick="runSync()">🔄 立即同步名冊</button>
+        <button class="btn ghost" onclick="toast('原型示範：查看完整同步紀錄')">查看完整記錄</button>
+      </div>
+    </div>
+    <div class="revoke-note">⚠️ <b>自動失效：</b>如學生轉組或轉班，下次同步時本系統會自動移除其帳戶對應——供應商不會保留已失效的存取，也毋須手動清理。這與校管系統（roster.html）的轉班同步是同一條自動鏈的延伸。</div>
+  </section>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+let accounts = [
+  {name:'李俊希', cls:'中二乙班', mapped:'Level 2 · Support Track', status:'active'},
+  {name:'鄭家朗', cls:'中二乙班', mapped:'Level 2 · Support Track', status:'active'},
+];
+let syncLog = [
+  {ic:'<svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg>', text:'同步完成：組別成員 2 人，無變動', time:'2026-07-15 03:00'},
+  {ic:'⚠', text:'同步完成：1 名學生因轉班，帳戶存取已自動移除（詳見校管系統名冊）', time:'2026-05-10 03:00'},
+];
+function renderAccounts(){
+  document.getElementById('acctTbody').innerHTML = accounts.map(a=>`
+    <tr>
+      <td><b>${a.name}</b></td>
+      <td>${a.cls}</td>
+      <td>${a.mapped}</td>
+      <td>${a.status==='active' ? '<span class="chip ok"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg> 使用中</span>' : '<span class="chip masked">已移除</span>'}</td>
+    </tr>`).join('');
+}
+function renderSync(){
+  document.getElementById('syncList').innerHTML = syncLog.map(s=>
+    `<div class="sync-row"><span class="s-ic">${s.ic}</span><span>${s.text}</span><span class="s-time">${s.time}</span></div>`
+  ).join('');
+}
+function runSync(){
+  const now = '2026-07-21 ' + new Date().toISOString().slice(11,16);
+  syncLog.unshift({ic:'<svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg>', text:'同步完成：組別成員 2 人，無變動', time:now});
+  renderSync();
+  toast('已從教學分組（groups.html）同步最新組別成員');
+}
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1900);}
+function showTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active', p.dataset.pane===name));
+}
+renderAccounts();
+renderSync();
+</script>
+<script src="feature-flags.js"></script>
+<script src="demo-nav.js"></script>
+</body>
+</html>

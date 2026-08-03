@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdCity 班級學習面貌 — 教師本班視圖（示意）</title>
+<!-- Site-wide typeface (2026-07-31): Chiron GoRound TC, a rounded
+     Traditional Chinese sans built on Source Han Sans/Chiron Hei HK,
+     replacing the plain system-font stack. Falls back to the previous
+     stack (PingFang TC / Microsoft JhengHei / Noto Sans TC / system) if
+     the network font fails to load. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ec-blue:#008BD1;--ec-blue-dark:#0072ab;--ec-red:#ED1A2E;--ec-green:#00AC6C;
+    --ec-maroon:#7B2539;--ec-amber:#F5A623;--ec-purple:#7C5CDB;
+    --ink:#1e2a35;--ink-2:#55636f;--ink-3:#8a97a3;--line:#e6ebf0;--bg:#f1f2f8;font-size:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Chiron GoRound TC","PingFang TC","Microsoft JhengHei","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg);color:var(--ink);display:flex;min-height:100vh;}
+  .sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+  .sidebar .logo-wrap{padding:20px 16px 20px;border-bottom:1px solid var(--line);}
+  .sidebar .logo-wrap img{width:100%;height:auto;display:block;}
+  .sidebar .logo-sub{font-size:.8rem;font-weight:700;color:var(--ink-2);margin-top:16px;letter-spacing:normal;}
+  .role-chip{display:inline-flex;align-items:center;gap:6px;font-size:.64rem;font-weight:700;color:var(--ec-blue-dark);background:#e6f4fb;border:1px solid #c4e5f5;border-radius:99px;padding:4px 10px;margin-top:14px;}
+  .nav{padding:14px 10px;flex:1;overflow-y:auto;}
+  .nav-group h6{font-size:.66rem;font-weight:600;color:var(--ec-blue);letter-spacing:normal;padding:0 10px 8px;text-transform:uppercase;}
+  .nav-group.governance{background:#f5f3fb;border:1px solid #e8e3f7;border-radius:12px;padding:10px 6px 8px;}
+  .nav-group.governance h6{color:var(--ec-purple,#7C5CDB);}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--ink-2);text-decoration:none;font-size:.85rem;margin-bottom:2px;}
+  .nav a:hover{background:#f2f6f9;}
+  .nav a.active{background:#e6f4fb;color:var(--ec-blue-dark);font-weight:600;}
+  .nav a .ic{width:17px;height:17px;flex-shrink:0;}
+  .sidebar .user{border-top:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .sidebar .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--ec-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;}
+  .sidebar .user .meta b{font-size:.8rem;display:block;}
+  .sidebar .user .meta span{font-size:.68rem;color:var(--ink-3);}
+
+  .main{flex:1;min-width:0;padding:44px 34px 80px;}
+  .ribbon{display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:700;
+    color:#b91c1c;background:#fee2e2;border:1px solid #f5c6c6;border-radius:99px;padding:5px 14px;margin-bottom:16px;}
+  .hero{margin-bottom:24px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  h1{font-size:1.8rem;font-weight:800;color:var(--ec-blue);}
+  .sub{font-size:.82rem;color:var(--ink-2);margin:6px 0 0;max-width:48em;line-height:1.6;}
+  .class-dd{position:relative;}
+  .class-btn{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:.82rem;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .class-btn b{color:var(--ec-blue-dark);}
+  .class-btn .car{font-size:.7rem;color:var(--ink-3);margin-left:2px;}
+  .class-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(20,30,40,.14);width:250px;padding:6px;display:none;z-index:40;}
+  .class-menu.show{display:block;}
+  .class-opt{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:.8rem;color:var(--ink-2);}
+  .class-opt:hover{background:#f2f6f9;}
+  .class-opt.on{background:#e6f4fb;color:var(--ec-blue-dark);font-weight:600;}
+  .class-opt small{font-size:.68rem;color:var(--ink-3);font-weight:400;}
+  .source-note{
+    margin:14px 0 18px;background:#e6f4fb;border:1px solid #c4e5f5;border-radius:12px;
+    padding:11px 15px;font-size:.76rem;color:var(--ec-blue-dark);line-height:1.65;max-width:52em;
+  }
+
+
+  .empty-row td{padding:30px 16px;text-align:center;color:var(--ink-3);font-size:.8rem;line-height:1.75;}
+  .empty-row .lbtn{margin-top:10px;display:inline-flex;}
+
+  .gchips{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .gchips .lbl{font-size:.68rem;letter-spacing:normal;color:var(--ink-2);font-weight:600;margin-right:4px;}
+  .gchip{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:7px 15px;font-size:.8rem;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:border-color .15s ease;}
+  .gchip:not(.on):hover{border-color:var(--ec-blue);}
+  .gchip.on{background:var(--ec-blue);border-color:var(--ec-blue);color:#fff;font-weight:600;}
+
+  h2{font-size:1rem;font-weight:700;margin:22px 0 12px;}
+  .trend-overview{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:4px;}
+  .trend-overview h3{font-size:.9rem;font-weight:700;margin-bottom:12px;}
+  .trend-overview svg{display:block;}
+  .ov-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:.72rem;color:var(--ink-2);}
+  .ov-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
+  .ov-empty{font-size:.78rem;color:var(--ink-3);}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  th,td{text-align:left;padding:12px 16px;font-size:.82rem;border-bottom:1px solid var(--line);}
+  th{font-size:.7rem;letter-spacing:normal;color:var(--ink-3);font-weight:600;background:#fafcfd;}
+  tr:last-child td{border-bottom:none;}
+  .trend{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.8rem;white-space:nowrap;}
+  .up{color:var(--ec-green);} .flat{color:#b07c10;} .down{color:var(--ec-red);}
+  .n-chip{font-size:.66rem;color:var(--ink-3);background:#f5f8fa;border:1px solid var(--line);border-radius:99px;padding:2px 8px;}
+  .trend-cell{display:flex;align-items:center;gap:10px;}
+  .trend-cell .spark{flex-shrink:0;display:block;}
+  .trend-cell .trend-lbl{display:flex;flex-direction:column;gap:1px;}
+  .trend-cell .trend-lbl small{font-weight:400;font-size:.66rem;color:var(--ink-3);}
+
+  .impact{
+    margin-top:22px;background:#fff;border:1px solid #bfe8d7;border-radius:14px;padding:18px 20px;
+  }
+  .impact h3{font-size:.92rem;font-weight:700;margin-bottom:8px;}
+  .impact p{font-size:.79rem;color:var(--ink-2);line-height:1.7;}
+  .impact .link-row{display:flex;gap:9px;margin-top:13px;flex-wrap:wrap;}
+  .lbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 15px;font-size:.78rem;color:var(--ec-blue-dark);font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;}
+  .lbtn:hover{border-color:var(--ec-blue);}
+
+  .caution{
+    margin-top:18px;background:#effaf5;border:1px solid #bfe8d7;border-radius:12px;
+    padding:11px 15px;font-size:.76rem;color:#0c6b48;line-height:1.65;max-width:52em;
+  }
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.78rem;padding:9px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;}
+  .toast.show{opacity:.94;}
+  footer.note{margin-top:40px;font-size:.68rem;color:var(--ink-3);text-align:center;}
+  @media (max-width:900px){.sidebar{display:none;}.main{padding:18px;}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <img src="edcity_logo.svg" alt="香港教育城 EdCity">
+    <div class="logo-sub">教學工具平台 · POC v0.1</div>
+    <div class="role-chip">🧑‍🏫 課堂層級 · 教師視圖</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">
+      <h6>教學工具</h6>
+      <a href="chat.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-9 8.36 8.5 8.5 0 01-3.4-.7L3 21l1.84-5.6A8.38 8.38 0 013.5 11.5a8.5 8.5 0 018.5-8.5 8.38 8.38 0 019 8.5z"/></svg>EdCity.ai</a>
+      <a href="index.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>教學工具</a>
+      <a href="agents.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>Apps／智能代理</a>
+      <a href="materials.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>教材準備</a>
+      <a href="material-library.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M4 8v10a2 2 0 002 2h12a2 2 0 002-2V8M10 12h4"/></svg>教材庫</a>
+      <a href="insights.html" class="active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 5-6"/></svg>班級學習面貌</a>
+      <a href="trial-invites.html" data-feature="toolTrial"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6L4 20a2 2 0 002 2h12a2 2 0 002-2l-5-12V2M9 2h6"/></svg>試用邀請</a>
+    </div>
+  </nav>
+  <div class="user">
+    <div class="avatar">陳</div>
+    <div class="meta"><b>陳凱怡老師</b><span>中文科</span></div>
+  </div>
+</aside>
+
+<main class="main">
+  <section class="hero">
+    <div class="ribbon">🟡 提案中 · 樣本聚合自已完成標籤對應的供應商工具（見供應商入口「共用分類法輸出」）——分類法已定，但供應商覆蓋仍待逐一對應完成</div>
+
+    <div class="page-head">
+      <div>
+        <h1>班級學習面貌</h1>
+        <div class="sub">無論是校內，或是任何已對接並完成標籤對應的供應商工具，只要學生使用過，留下的技能標籤都會計入<b>你班</b>的學習面貌。每一次的批改和使用工具產生的結果，都會變成看得見的教學依據。</div>
+      </div>
+      <div class="class-dd">
+        <button class="class-btn" id="classBtn" onclick="toggleClassMenu()">📋 <b id="classLabel">中二乙班</b><span id="classMeta">· 中文 · 35 人</span><span class="car">▾</span></button>
+        <div class="class-menu" id="classMenu">
+          <div class="class-opt on" data-c="2b" onclick="switchClass('2b')">中二乙班<small>中文 · 35 人 · 任教中</small></div>
+          <div class="class-opt" data-c="1c" onclick="switchClass('1c')">中一丙班<small>中文 · 35 人 · 本學期剛接手</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="source-note">ℹ️ 數據來源：AI 批改，以及已完成標籤對應、通過教育城核實的供應商工具——所有標籤須先對應到共用分類法（科目 × 技能維度 × 掌握程度），<b>再經內容審核</b>，才會計入。未完成對應或未經審核的標籤不會出現在這裏。只有你看到本班的完整面貌；科組只見趨勢方向，學生只見自己。</div>
+
+
+  <div class="gchips">
+    <span class="lbl">按分組檢視</span>
+    <button class="gchip on" data-g="all" onclick="setG(this)">全班</button>
+    <button class="gchip" data-g="stretch" onclick="setG(this)">增潤組</button>
+    <button class="gchip" data-g="core" onclick="setG(this)">核心組</button>
+    <button class="gchip" data-g="support" onclick="setG(this)">支援組</button>
+  </div>
+
+  <div class="trend-overview" id="trendOverview"></div>
+
+  <h2 id="tblTitle">技能面貌 · 全班</h2>
+  <table>
+    <thead><tr><th>技能維度</th><th>近六週趨勢</th><th>樣本</th><th>你可能想知道</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="impact" id="impactCard">
+    <h3>🔎 一個看得見的因果：工作紙 v2 之後</h3>
+    <p>你在 5 月底用「教材準備」為支援組加了分層提問版工作紙。之後四次練習，支援組在「推論」的穩固比率由 3/10 升至 6/10——樣本仍較少，暫未足以下結論，但值得繼續觀察。</p>
+    <div class="link-row">
+      <a class="lbtn" href="materials.html">📚 再生成分層教材 →</a>
+      <a class="lbtn" href="groups.html">👥 調整教學分組 →</a>
+      <a class="lbtn" href="marking.html">✍️ 用 AI 批改增加樣本 →</a>
+    </div>
+  </div>
+
+  <div class="caution" id="cautionBox" style="display:none;">🌱 <b>提醒自己：</b>這個面貌用來安排下一步教學，不是用來評判學生。詞彙運用落後的五位同學，需要的是不同的路徑，不是同一條路走快些。</div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script>
+const CLASS_DATA = {
+  '2b':{
+    label:'中二乙班', meta:'· 中文 · 35 人',
+    stats:[
+      {n:'96',l:'已核實樣本數（近六週）'},
+      {n:'92%',l:'標籤已審核比率'},
+      {n:'1',l:'覆蓋不足的技能維度', warn:true},
+    ],
+    hasImpact:true,
+    caution:'🌱 <b>提醒自己：</b>這個面貌用來安排下一步教學，不是用來評判學生。詞彙運用落後的五位同學，需要的是不同的路徑，不是同一條路走快些。',
+    groups:{
+      all:{title:'技能面貌 · 全班（35 人）', rows:[
+        {name:'閱讀理解 · 推論', series:[48,52,58,63,68,74], sample:'28 份樣本', insight:'新閱讀策略似乎見效——增潤組已可挑戰更深層提問'},
+        {name:'閱讀理解 · 主旨理解', series:[50,54,57,62,66,70], sample:'26 份樣本', insight:'—'},
+        {name:'寫作 · 段落結構', series:[55,57,54,56,55,57], sample:'19 份樣本', insight:'三個分組差異不大，可全班同步處理'},
+        {name:'語文基礎 · 詞彙運用', series:[60,57,53,50,46,42], sample:'22 份樣本', insight:'困難集中在支援組及部分核心組同學'},
+      ]},
+      stretch:{title:'技能面貌 · 增潤組（3 人）', rows:[
+        {name:'閱讀理解 · 推論', series:[70,74,78,82,85,88], sample:'9 份樣本', insight:'可加開放式提問——先寫再看評語'},
+        {name:'寫作 · 段落結構', series:[60,64,68,71,75,79], sample:'7 份樣本', insight:'適合嘗試議論文結構'},
+        {name:'語文基礎 · 詞彙運用', series:[66,68,65,67,66,68], sample:'8 份樣本', insight:'—'},
+      ]},
+      core:{title:'技能面貌 · 核心組（5 人）', rows:[
+        {name:'閱讀理解 · 推論', series:[50,54,58,62,65,69], sample:'15 份樣本', insight:'—'},
+        {name:'寫作 · 段落結構', series:[52,54,51,53,52,54], sample:'10 份樣本', insight:'開頭段落是共同弱項'},
+        {name:'語文基礎 · 詞彙運用', series:[58,54,50,47,44,40], sample:'12 份樣本', insight:'三位同學連續兩次未達穩固'},
+      ]},
+      support:{title:'技能面貌 · 支援組（2 人）', rows:[
+        {name:'閱讀理解 · 推論', series:[30,35,40,46,52,58], sample:'4 份樣本', insight:'工作紙 v2 之後有起色（見下方）'},
+        {name:'寫作 · 段落結構', series:[40,42,39,41,40,42], sample:'2 份樣本', insight:'樣本太少，暫不作判斷'},
+        {name:'語文基礎 · 詞彙運用', series:[45,41,37,33,30,27], sample:'6 份樣本', insight:'建議配合筆順與詞語卡，從字入手'},
+      ]},
+    },
+  },
+  '1c':{
+    label:'中一丙班', meta:'· 中文 · 35 人',
+    stats:[
+      {n:'6',l:'已核實樣本數（本學期）'},
+      {n:'100%',l:'標籤已審核比率'},
+      {n:'4',l:'覆蓋不足的技能維度', warn:true},
+    ],
+    hasImpact:false,
+    caution:'🌱 <b>剛接手這班：</b>面貌會隨批改與已對接工具的使用逐步累積建立，不會用「未夠分」提早下判斷。',
+    groups:{
+      all:{title:'技能面貌 · 全班（35 人）', rows:[]},
+      stretch:{title:'技能面貌 · 增潤組', rows:[]},
+      core:{title:'技能面貌 · 核心組', rows:[]},
+      support:{title:'技能面貌 · 支援組', rows:[]},
+    },
+  },
+};
+/* Trend charts — replaces the plain up/flat/down arrow with an actual line
+ * chart, and derives the direction/label FROM the series itself instead of a
+ * separately hand-typed string, so the two can't drift apart (same reasoning
+ * as reconciling the skill-tag names earlier: don't hand-maintain two
+ * descriptions of the same underlying number). */
+const TREND_COLOR = {up:'#00AC6C', flat:'#b07c10', down:'#ED1A2E'};
+const OVERVIEW_COLORS = ['#008BD1','#00AC6C','#F5A623','#7B2539'];
+
+function trendMeta(series){
+  const delta = series[series.length-1] - series[0];
+  if(delta >= 5) return {dir:'up', label: series[series.length-1]>=80 ? '▲ 穩固' : '▲ 進步中'};
+  if(delta <= -5) return {dir:'down', label:'▼ 需要關注'};
+  return {dir:'flat', label:'▶ 大致持平'};
+}
+function sparklineSVG(values, color){
+  const w=86, h=26, pad=3;
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = (max-min) || 1;
+  const stepX = (w-2*pad)/(values.length-1);
+  const y = v => h-pad - ((v-min)/range)*(h-2*pad);
+  const pts = values.map((v,i)=>`${(pad+i*stepX).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const last = values.length-1;
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/>
+    <circle cx="${(pad+last*stepX).toFixed(1)}" cy="${y(values[last]).toFixed(1)}" r="2.4" fill="${color}"/>
+  </svg>`;
+}
+function multiSparklineSVG(seriesList, colors){
+  const w=600, h=150, pad=14;
+  const allVals = seriesList.flat();
+  const min = Math.min(...allVals), max = Math.max(...allVals);
+  const range = (max-min) || 1;
+  const n = seriesList[0].length;
+  const stepX = (w-2*pad)/(n-1);
+  const y = v => h-pad - ((v-min)/range)*(h-2*pad);
+  const grid = [0.25,0.5,0.75].map(f=>{
+    const yy = (pad + (h-2*pad)*f).toFixed(1);
+    return `<line x1="${pad}" y1="${yy}" x2="${w-pad}" y2="${yy}" stroke="#eef2f5" stroke-width="1"/>`;
+  }).join('');
+  const lines = seriesList.map((series,i)=>{
+    const pts = series.map((v,idx)=>`${(pad+idx*stepX).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="2.4"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">${grid}${lines}</svg>`;
+}
+function renderTrendOverview(g){
+  const d = CLASS_DATA[currentClass].groups[g];
+  const wrap = document.getElementById('trendOverview');
+  if(!d.rows.length){
+    wrap.innerHTML = `<div class="ov-empty">尚未累積足夠樣本，暫時沒有走勢可以顯示。</div>`;
+    return;
+  }
+  const chart = multiSparklineSVG(d.rows.map(r=>r.series), OVERVIEW_COLORS);
+  const legend = d.rows.map((r,i)=>`<span><span class="dot" style="background:${OVERVIEW_COLORS[i%OVERVIEW_COLORS.length]}"></span>${r.name}</span>`).join('');
+  wrap.innerHTML = `<h3>近六週穩固比率走勢 · ${d.title.replace('技能面貌 · ','')}</h3>${chart}<div class="ov-legend">${legend}</div>`;
+}
+let currentClass='2b';
+function toggleClassMenu(){document.getElementById('classMenu').classList.toggle('show');}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.class-dd')) document.getElementById('classMenu').classList.remove('show');
+});
+function switchClass(c){
+  currentClass=c;
+  const cd=CLASS_DATA[c];
+  document.getElementById('classLabel').textContent=cd.label;
+  document.getElementById('classMeta').textContent=cd.meta;
+  document.querySelectorAll('.class-opt').forEach(o=>o.classList.toggle('on',o.dataset.c===c));
+  document.getElementById('classMenu').classList.remove('show');
+  document.getElementById('impactCard').style.display=cd.hasImpact?'':'none';
+  document.getElementById('cautionBox').innerHTML=cd.caution;
+  document.querySelectorAll('.gchip').forEach(b=>b.classList.toggle('on',b.dataset.g==='all'));
+  render('all');
+  renderTrendOverview('all');
+  toast('已切換班別：'+cd.label);
+}
+function setG(btn){
+  document.querySelectorAll('.gchip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  render(btn.dataset.g);
+  renderTrendOverview(btn.dataset.g);
+  toast('已切換至：'+btn.textContent.trim());
+}
+function render(g){
+  const d = CLASS_DATA[currentClass].groups[g];
+  document.getElementById('tblTitle').textContent = d.title;
+  if(d.rows.length===0){
+    document.getElementById('tbody').innerHTML =
+      `<tr class="empty-row"><td colspan="4">尚未累積足夠樣本，這裏會顯示技能面貌<br>
+       <a class="lbtn" href="marking.html">✍️ 用 AI 批改開始累積 →</a></td></tr>`;
+    return;
+  }
+  document.getElementById('tbody').innerHTML = d.rows.map(r=>{
+    const {dir,label} = trendMeta(r.series);
+    return `<tr><td>${r.name}</td><td><div class="trend-cell">${sparklineSVG(r.series,TREND_COLOR[dir])}<div class="trend-lbl"><span class="trend ${dir}">${label}</span><small>近六週</small></div></div></td><td><span class="n-chip">${r.sample}</span></td><td style="font-size:.76rem;color:var(--ink-2);">${r.insight}</td></tr>`;
+  }).join('');
+}
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1500);}
+render('all');
+renderTrendOverview('all');
+</script>
+<script src="usage-modal.js"></script>
+<script src="feature-flags.js"></script>
+<script src="demo-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdCity 訂閱管理 — 故事 4：資訊科技統籌（示意）</title>
+<!-- Site-wide typeface (2026-07-31): Chiron GoRound TC, a rounded
+     Traditional Chinese sans built on Source Han Sans/Chiron Hei HK,
+     replacing the plain system-font stack. Falls back to the previous
+     stack (PingFang TC / Microsoft JhengHei / Noto Sans TC / system) if
+     the network font fails to load. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ec-blue:#008BD1;--ec-blue-dark:#0072ab;--ec-red:#ED1A2E;--ec-green:#00AC6C;
+    --ec-maroon:#7B2539;--ec-amber:#F5A623;--ec-purple:#7C5CDB;
+    --ink:#1e2a35;--ink-2:#55636f;--ink-3:#8a97a3;--line:#e6ebf0;--bg:#f1f2f8;font-size:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Chiron GoRound TC","PingFang TC","Microsoft JhengHei","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg);color:var(--ink);display:flex;min-height:100vh;}
+  .sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+  .sidebar .logo-wrap{padding:20px 16px 20px;border-bottom:1px solid var(--line);}
+  .sidebar .logo-wrap img{width:100%;height:auto;display:block;}
+  .sidebar .logo-sub{font-size:.8rem;font-weight:700;color:var(--ink-2);margin-top:16px;letter-spacing:normal;}
+  .role-tag{display:inline-flex;align-items:center;gap:6px;font-size:.64rem;font-weight:700;border-radius:99px;padding:4px 10px;margin-top:14px;color:var(--ec-purple);background:#f1edfb;border:1px solid #ddd3f5;}
+  .nav{padding:14px 10px;flex:1;}
+  .nav-group h6{font-size:.66rem;font-weight:600;color:var(--ec-blue);letter-spacing:normal;padding:0 10px 8px;text-transform:uppercase;}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--ink-2);text-decoration:none;font-size:.85rem;margin-bottom:2px;}
+  .nav a:hover{background:#f2f6f9;}
+  .nav a.active{background:#e6f4fb;color:var(--ec-blue-dark);font-weight:600;}
+  .sidebar .user{border-top:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+  .sidebar .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--ec-purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;}
+  .sidebar .user .meta b{font-size:.8rem;display:block;}
+  .sidebar .user .meta span{font-size:.68rem;color:var(--ink-3);}
+
+  .main{flex:1;min-width:0;padding:26px 34px 80px;}
+  .ribbon{display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:700;color:#8a6d00;background:#fdf1c7;border:1px solid #f0dfa0;border-radius:99px;padding:5px 14px;margin-bottom:16px;}
+  h1{font-size:1.8rem;font-weight:800;color:var(--ec-purple);}
+  .hero{margin-bottom:24px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .sub{font-size:.82rem;color:var(--ink-2);margin:6px 0 0;max-width:48em;line-height:1.6;}
+
+  h2{font-size:1rem;font-weight:700;margin:24px 0 12px;}
+
+  /* pending requests */
+  .req{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;}
+  .req .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+  .req .body{flex:1;min-width:240px;}
+  .req b{font-size:.88rem;}
+  .req p{font-size:.76rem;color:var(--ink-2);line-height:1.6;margin-top:4px;}
+  .req .scope{font-size:.66rem;font-weight:700;border-radius:99px;padding:3px 10px;display:inline-block;margin-top:8px;}
+  .req.direct .ic{background:#effaf5;}
+  .req.direct .scope{color:var(--ec-green);background:#effaf5;border:1px solid #bfe8d7;}
+  .req.gated .ic{background:#faf1f3;}
+  .req.gated .scope{color:var(--ec-maroon);background:#faf1f3;border:1px solid #e5cdd4;}
+  .req .btns{display:flex;gap:8px;align-self:center;flex-shrink:0;}
+  .btn{border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;background:var(--ec-blue);color:#fff;transition:background .15s ease;}
+  .btn:not(.ghost):hover{background:var(--ec-blue-dark);}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink-2);font-weight:600;}
+  .btn:disabled{background:#e6ebf0;color:#8a97a3;cursor:default;}
+
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  th,td{text-align:left;padding:12px 16px;font-size:.8rem;border-bottom:1px solid var(--line);vertical-align:middle;}
+  th{font-size:.68rem;letter-spacing:normal;color:var(--ink-3);font-weight:600;background:#fafcfd;}
+  tr:last-child td{border-bottom:none;}
+  td .tool{font-weight:700;}
+  td .vend{font-size:.68rem;color:var(--ink-3);display:block;margin-top:2px;}
+  .chip{font-size:.64rem;font-weight:700;border-radius:99px;padding:3px 9px;display:inline-block;}
+  .chip.ok{color:var(--ec-green);background:#effaf5;border:1px solid #bfe8d7;}
+  .chip.warn{color:#b07c10;background:#fdf6ec;border:1px solid #f3e3c3;}
+  .chip.dept{color:var(--ec-blue-dark);background:#e6f4fb;border:1px solid #c4e5f5;}
+  .chip.ind{color:var(--ink-2);background:#f5f8fa;border:1px solid var(--line);}
+  .note-row{font-size:.72rem;color:var(--ink-3);margin-top:10px;line-height:1.6;max-width:52em;}
+
+  .req.capacity .ic{background:#fdf6ec;}
+  .req.capacity .scope{color:#b07c10;background:#fdf6ec;border:1px solid #f3e3c3;}
+
+  .req.done .ic{background:#e6f7ef;}
+  .req.reminded .ic{background:#f1edfb;}
+  .preview-mock{background:#f7f9fb;border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;}
+  .preview-mock .pm-label{font-size:.68rem;color:var(--ink-3);display:block;margin-bottom:6px;}
+  .pm-tool{display:flex;align-items:center;gap:9px;font-size:.82rem;background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 12px;}
+  .pm-tool b{font-size:.82rem;}
+  .pm-tool span{display:block;font-size:.66rem;color:var(--ink-3);font-weight:400;margin-top:1px;}
+  .detail-block{margin-top:10px;background:#f7f9fb;border-radius:10px;padding:10px 14px;width:100%;}
+  .detail-row{display:flex;gap:10px;font-size:.76rem;padding:5px 0;border-bottom:1px solid var(--line);}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-row span:first-child{width:110px;flex-shrink:0;color:var(--ink-3);}
+  .detail-row span:last-child{color:var(--ink);}
+
+  .plan-zone{background:#f7f9fb;border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:28px;}
+  .plan-zone h2{margin-top:0;}
+  .plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:14px;}
+  .plan-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .plan-card b{font-size:.88rem;display:block;}
+  .plan-card .pv{font-size:.68rem;color:var(--ink-3);margin-top:2px;display:block;}
+  .plan-card .cap-row{margin-top:12px;}
+  .plan-card .cap-row .lbl{font-size:.7rem;color:var(--ink-2);display:flex;justify-content:space-between;margin-bottom:5px;}
+  .plan-card .cap-row.unlimited-row{font-size:.76rem;color:var(--ink-2);line-height:1.6;}
+  .cap-bar{height:7px;border-radius:99px;background:#eef2f5;overflow:hidden;}
+  .cap-fill{height:100%;border-radius:99px;}
+  .cap-fill.ok{background:var(--ec-green);}
+  .cap-fill.warn{background:var(--ec-amber);}
+  .cap-fill.danger{background:var(--ec-red);}
+  .plan-card .renew{font-size:.68rem;color:var(--ink-3);margin-top:12px;}
+  .plan-state{font-size:.62rem;font-weight:700;border-radius:99px;padding:2px 9px;display:inline-block;margin-top:8px;}
+  .plan-state.ok{color:var(--ec-green);background:#effaf5;border:1px solid #bfe8d7;}
+  .plan-state.warn{color:#b07c10;background:#fdf6ec;border:1px solid #f3e3c3;}
+  .plan-state.danger{color:var(--ec-red);background:#fdecec;border:1px solid #f3c6c9;}
+
+  .tabs{display:flex;gap:22px;margin:16px 0 22px;border-bottom:1px solid var(--line);}
+  .tab-btn{background:none;border:none;padding:10px 2px;font-size:.86rem;font-weight:600;color:var(--ink-3);
+    cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;}
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--ec-purple);}
+  .tab-btn .tab-count{font-size:.64rem;font-weight:700;color:#8a5a00;background:#fdf1c7;border-radius:99px;padding:1px 8px;}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.78rem;padding:9px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;}
+  .toast.show{opacity:.94;}
+  footer.note{margin-top:40px;font-size:.68rem;color:var(--ink-3);text-align:center;}
+  @media (max-width:900px){.sidebar{display:none;}.main{padding:18px;}}
+
+  .role-banner{background:#f1edfb;border-bottom:1px solid #ddd3f5;color:var(--ec-purple);
+    font-size:.7rem;font-weight:700;letter-spacing:normal;padding:9px 34px;position:sticky;top:0;z-index:50;}
+  .nav-group h6{color:var(--ec-purple) !important;}
+  .nav a.active{background:#f1edfb !important;color:var(--ec-purple) !important;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <img src="edcity_logo.svg" alt="香港教育城 EdCity">
+    <div class="logo-sub">AI 教學工具平台 · POC v0.1</div>
+    <div class="role-tag">🔧 學校行政層級 · 資訊科技統籌視圖</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">
+      <h6>學校管理</h6>
+      <a href="subscriptions.html" class="active">🗂 訂閱管理</a>
+      <a href="usage-report.html">📊 使用報告</a>
+    </div>
+    <div class="nav-group" style="margin-top:18px;">
+      <h6>其他系統（同一人，不同帳戶）</h6>
+      <a href="eddata-console.html">🔐 供應商資料存取審批 →</a>
+    </div>
+  </nav>
+  <div class="user">
+    <div class="avatar">馮</div>
+    <div class="meta"><b>馮 Sir</b><span>資訊科技統籌</span></div>
+  </div>
+</aside>
+
+<main class="main" style="padding-top:0;">
+<div class="role-banner">學校行政層級 — 資訊科技統籌視圖</div>
+<div style="padding:44px 0 0;">
+  <section class="hero">
+    <div class="ribbon">🟡 提案中 · 此畫面為設計方案，功能未建置</div>
+    <h1>訂閱管理</h1>
+    <div class="sub">全校訂閱的教育城審核工具集中顯示在同一畫面，續期日期與適用範圍一目了然。<b>批出授權後，工具會自動出現在教師介面</b>，毋須另建帳號或派發密碼。</div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="pending" onclick="showTab('pending')">待處理申請<span class="tab-count" id="pendingCount" style="display:none;"></span></button>
+    <button class="tab-btn" data-tab="plans" onclick="showTab('plans')">供應商方案名額</button>
+    <button class="tab-btn" data-tab="existing" onclick="showTab('existing')">現有訂閱</button>
+  </div>
+
+  <section class="tab-pane active" data-pane="pending">
+    <div class="req direct" id="directTrialCard">
+      <div class="ic">🧑‍🏫</div>
+      <div class="body">
+        <b>兩位中文科教師申請試用「智寫」寫作回饋工具。</b>
+        <p>陳凱怡老師、黃穎詩老師 · 屬個人試用性質，並非科組承諾。按管治規則，小規模試用<b>可直接批出</b>，毋須科主任評估。</p>
+        <span class="scope"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg> 小規模試用 · 可直接批出</span>
+        <div class="detail-block" id="directTrialDetail" style="display:none;">
+          <div class="detail-row"><span>申請人</span><span>陳凱怡老師、黃穎詩老師（中文科）</span></div>
+          <div class="detail-row"><span>工具</span><span>智寫科技 · 寫作回饋工具</span></div>
+          <div class="detail-row"><span>申請性質</span><span>個別教師試用，非科組承諾</span></div>
+          <div class="detail-row"><span>擬批層級</span><span>Tier 1 · 基本資料（試用預設層級，不屬於資料存取審批的個別核准範圍）</span></div>
+          <div class="detail-row"><span>來源</span><span>教師於 AI 工具介面自行申請試用</span></div>
+          <div class="detail-row"><span>提交日期</span><span>2026-07-24</span></div>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="btn" id="grantBtn" onclick="grant(this)">批出（限 2 人）</button>
+        <button class="btn ghost" id="detailBtn" onclick="toggleDetail()">詳情</button>
+      </div>
+    </div>
+    <div class="req gated" id="deptTrialCard">
+      <div class="ic">🏫</div>
+      <div class="body">
+        <b>中文科申請全科採用「智寫」寫作回饋工具。</b>
+        <p>科主任提出全科訂閱申請。按管治規則，<b>須待科主任完成實測評估並提交建議</b>（可參考科組視圖中的工具試用評估）方可批出。全科採用與小規模試用，在把關程度上自然有所不同。</p>
+        <span class="scope">⏳ 待科主任評估建議 · 暫不能批出</span>
+      </div>
+      <div class="btns">
+        <button class="btn" disabled>批出</button>
+        <button class="btn ghost" onclick="remindPanelHead(this)">催辦</button>
+      </div>
+    </div>
+    <div id="capacityAlerts"></div>
+  </section>
+
+  <section class="tab-pane" data-pane="plans">
+    <div class="sub" style="margin:0 0 14px;">每個方案的教師與學生名額上限。用量達八成即提早示警，讓你在教師提交請求前，先看到快要滿額的方案。</div>
+    <div class="plan-grid" id="planGrid"></div>
+    <div class="note-row">名額用量與 <a href="eddata-console.html" style="color:var(--ec-blue-dark);font-weight:700;">供應商資料存取審批</a> 共用同一份供應商資料（vendor-data.js），已核准組別的學生人數會自動滙總，不會出現兩邊數字不一致的情況。</div>
+  </section>
+
+  <section class="tab-pane" data-pane="existing">
+    <table>
+      <thead><tr><th>工具</th><th>續期</th><th>範圍</th><th>狀態</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tool">AI 中文作文批改</span><span class="vend">墨言科技 · 教育城已審核</span></td>
+          <td>2027-08-31</td>
+          <td><span class="chip dept">中文科 · 全科</span></td>
+          <td><span class="chip ok"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg> 使用中</span></td>
+        </tr>
+        <tr>
+          <td><span class="tool">普通話朗讀評測</span><span class="vend">智語科技 · 教育城已審核</span></td>
+          <td>2026-12-31</td>
+          <td><span class="chip dept">中文科 · 全科</span></td>
+          <td><span class="chip ok"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg> 使用中</span></td>
+        </tr>
+        <tr>
+          <td><span class="tool">中文分級閱讀庫</span><span class="vend">點讀教育 · 教育城已審核</span></td>
+          <td>2026-08-15</td>
+          <td><span class="chip ind" id="diandu-teacher-count">個別教師 × 3</span></td>
+          <td><span class="chip warn">⚠ 34 天後續期</span></td>
+        </tr>
+        <tr>
+          <td><span class="tool">古典詩詞互動課件</span><span class="vend">文淵智學 · 教育城已審核</span></td>
+          <td>已於 2026-06-30 屆滿</td>
+          <td><span class="chip ind">個別教師 × 1</span></td>
+          <td><span class="chip warn">已屆滿 · 歷史數據保留</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note-row">訂閱屆滿後，工具會從教師介面移除，但<b>已收集的標籤數據會保留為歷史紀錄</b>，不會因不續期而消失。教師介面（Apps／智能代理）中「校方已採購」的標示，正是由此處的授權驅動。</div>
+    <div class="note-row">🔐 本頁只決定「用不用這件工具」；教師組別的<b>資料存取層級</b>是另一個決定，記錄在 <a href="eddata-console.html" style="color:var(--ec-blue-dark);font-weight:700;">供應商資料存取審批</a>（校管系統，另一系統）。</div>
+  </section>
+</div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="feature-flags.js"></script>
+<script src="vendor-data.js"></script>
+<script>
+/* unlimited/full-school plans aren't seat-capped, so they live outside vendor-data.js's
+ * VENDOR_PLANS — they never need a capacity check, only a display entry here. */
+const UNLIMITED_PLANS = [
+  {vendorName:'智語科技', product:'普通話朗讀評測', plan:'全校方案', note:'不設教師／學生名額上限，按全校教師人數議定年費。', renewal:'2026-12-31'},
+];
+
+function pctClass(pct){ return pct>=100 ? 'danger' : pct>=80 ? 'warn' : 'ok'; }
+function pctStateChip(pct){
+  if(pct>=100) return `<span class="plan-state danger">✕ 已達上限</span>`;
+  if(pct>=80) return `<span class="plan-state warn">⚠ 接近上限</span>`;
+  return `<span class="plan-state ok"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg> 名額充裕</span>`;
+}
+
+function renderPlanGrid(){
+  const cards = Object.keys(VENDOR_PLANS).map(vendorId=>{
+    const v = VENDORS.find(x=>x.id===vendorId);
+    const plan = VENDOR_PLANS[vendorId];
+    const usage = vendorUsage(vendorId);
+    const tPct = Math.round((usage.teachers/plan.teacherCap)*100);
+    const sPct = Math.round((usage.students/plan.studentCap)*100);
+    const worst = Math.max(tPct, sPct);
+    return `<div class="plan-card">
+      <b>${v.name}</b><span class="pv">${v.product} · ${plan.plan}</span>
+      <div class="cap-row">
+        <div class="lbl"><span>教師名額</span><span>${usage.teachers} / ${plan.teacherCap}</span></div>
+        <div class="cap-bar"><div class="cap-fill ${pctClass(tPct)}" style="width:${Math.min(tPct,100)}%"></div></div>
+      </div>
+      <div class="cap-row">
+        <div class="lbl"><span>學生名額</span><span>${usage.students} / ${plan.studentCap}</span></div>
+        <div class="cap-bar"><div class="cap-fill ${pctClass(sPct)}" style="width:${Math.min(sPct,100)}%"></div></div>
+      </div>
+      ${pctStateChip(worst)}
+      <div class="renew">續期日：${plan.renewal}</div>
+    </div>`;
+  });
+  const unlimitedCards = UNLIMITED_PLANS.map(p=>`<div class="plan-card">
+    <b>${p.vendorName}</b><span class="pv">${p.product} · ${p.plan}</span>
+    <div class="cap-row unlimited-row">${p.note}</div>
+    <span class="plan-state ok"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg> 不受名額限制</span>
+    <div class="renew">續期日：${p.renewal}</div>
+  </div>`);
+  document.getElementById('planGrid').innerHTML = cards.concat(unlimitedCards).join('');
+}
+
+function renderCapacityAlerts(){
+  const alerts = [];
+  VENDORS.forEach(v=>{
+    if(!VENDOR_PLANS[v.id]) return;
+    v.pending.forEach(req=>{
+      if(req.status!=='pending') return;
+      const check = capacityCheck(v.id, req.headcount);
+      if(check.overBy>0){
+        alerts.push(`<div class="req capacity">
+          <div class="ic">📊</div>
+          <div class="body">
+            <b>${teacherName(req.teacherId)}為${req.group}申請「${v.name}」${v.product}</b>
+            <p>「${v.name}」${check.plan.plan}的學生名額目前用去 ${check.usage.students} / ${check.plan.studentCap} 個，批出這個請求需要另加 ${req.headcount} 個，會超出上限 ${check.overBy} 個。這是<b>方案容量</b>的決定，不是資料存取層級的決定，所以在進入供應商資料存取審批前，先由此攔截。</p>
+            <span class="scope">⚠ 超出方案名額 ${check.overBy} 個 · 需要方案決定</span>
+          </div>
+          <div class="btns">
+            <button class="btn" onclick="toast('原型示範：升級「${v.name}」方案並批出請求')">升級方案並批出</button>
+            <button class="btn ghost" onclick="toast('原型示範：婉拒，並請${teacherName(req.teacherId)}於 ${check.plan.renewal} 續期後重新申請')">婉拒</button>
+          </div>
+        </div>`);
+      }
+    });
+  });
+  document.getElementById('capacityAlerts').innerHTML = alerts.join('');
+
+  // 2 static cards (direct trial + gated dept request) always count, plus any capacity alerts
+  const countEl = document.getElementById('pendingCount');
+  const total = 2 + alerts.length;
+  countEl.style.display = 'inline-block';
+  countEl.textContent = total;
+}
+
+function showTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active', p.dataset.pane===name));
+}
+
+/* "Next-step" screens added 2026-07-27, per Eric: every action on this page
+ * used to be a toast()-only stub — clicking 批出/催辦/詳情 had no real result
+ * to look at, so there was no way to see what actually happens next. These
+ * three replace/expand the card in place with the concrete outcome, instead
+ * of just acknowledging the click. Still illustrative (this prototype has no
+ * real backend), but the copy is honest about what's simulated vs. what a
+ * real system would do — e.g. 催辦 doesn't pretend to unlock 批出 on this
+ * page, since that state genuinely lives on dept-trial-evaluations.html and
+ * this page has no live link to it (same "each page is self-contained,
+ * cross-page continuity is a link/note, not fake synced state" convention
+ * already used between dept-trial-evaluations.html and this page). */
+function grant(btn){
+  const card = document.getElementById('directTrialCard');
+  card.className = 'req done';
+  card.innerHTML = `
+    <div class="ic">✅</div>
+    <div class="body">
+      <b>已批出：陳凱怡老師、黃穎詩老師 · 智寫寫作回饋工具（個人試用）</b>
+      <p>生效層級：Tier 1 · 基本資料（小規模試用預設層級，不涉及全班／全科規模存取，毋須經供應商資料存取審批個別核准）。生效日期：即日起。</p>
+      <div class="preview-mock">
+        <span class="pm-label">教師介面現在會顯示：</span>
+        <div class="pm-tool">🖊 <div><b>寫作回饋工具</b><span>智寫科技 · 校方已採購 · 個人試用</span></div></div>
+      </div>
+      <p class="note-row">🔐 此批出只決定「用不用這件工具」；若日後試用擴展至整組學生，資料存取層級須另經<a href="eddata-console.html" style="color:var(--ec-blue-dark);font-weight:700;">供應商資料存取審批</a>個別審批。</p>
+    </div>`;
+  toast('已批出試用權限 · 工具將自動出現在兩位教師的介面');
+  const countEl = document.getElementById('pendingCount');
+  countEl.textContent = Math.max(0, parseInt(countEl.textContent||'0',10)-1);
+}
+function toggleDetail(){
+  const d = document.getElementById('directTrialDetail');
+  const btn = document.getElementById('detailBtn');
+  const showing = d.style.display !== 'none';
+  d.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? '詳情' : '收合詳情';
+}
+function remindPanelHead(btn){
+  const card = document.getElementById('deptTrialCard');
+  card.className = 'req reminded';
+  card.innerHTML = `
+    <div class="ic">🔔</div>
+    <div class="body">
+      <b>已提醒李天佑主任完成「智寫」寫作回饋工具的科組試用評估</b>
+      <p>提醒已送出（示意）。李天佑主任會在<a href="dept-trial-evaluations.html" style="color:var(--ec-blue-dark);font-weight:700;">工具試用評估</a>開始一週實測評估；評估通過並提交建議後，全科採用的批出按鈕才會在此處解鎖——這是另一頁的獨立狀態，本頁不會自動偵測到評估完成，須你之後回來查看。</p>
+      <span class="scope">⏳ 待科主任評估建議 · 暫不能批出</span>
+    </div>
+    <div class="btns">
+      <button class="btn ghost" onclick="location.href='dept-trial-evaluations.html'">前往工具試用評估 →</button>
+    </div>`;
+  toast('已提醒李天佑主任開始評估');
+}
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1900);}
+renderCapacityAlerts();
+renderPlanGrid();
+
+/* Reconcile the one pre-existing "現有訂閱" row that overlaps with vendor-data.js,
+ * instead of leaving a hand-typed teacher count that can drift from the real grants. */
+(function(){
+  const usage = vendorUsage('diandu');
+  const el = document.getElementById('diandu-teacher-count');
+  if(el) el.textContent = '個別教師 × ' + usage.teachers;
+})();
+</script>
+<script src="demo-nav.js"></script>
+</body>
+</html>

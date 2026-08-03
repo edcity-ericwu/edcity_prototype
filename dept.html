@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdCity 科組視圖 — 故事 7：科主任統計（示意）</title>
+<!-- Site-wide typeface (2026-07-31): Chiron GoRound TC, a rounded
+     Traditional Chinese sans built on Source Han Sans/Chiron Hei HK,
+     replacing the plain system-font stack. Falls back to the previous
+     stack (PingFang TC / Microsoft JhengHei / Noto Sans TC / system) if
+     the network font fails to load. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ec-blue:#008BD1;--ec-blue-dark:#0072ab;--ec-red:#ED1A2E;--ec-green:#00AC6C;
+    --ec-maroon:#7B2539;--ec-amber:#F5A623;--ec-purple:#7C5CDB;
+    --ink:#1e2a35;--ink-2:#55636f;--ink-3:#8a97a3;--line:#e6ebf0;--bg:#f1f2f8;font-size:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Chiron GoRound TC","PingFang TC","Microsoft JhengHei","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg);color:var(--ink);display:flex;min-height:100vh;}
+  .sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+  .sidebar .logo-wrap{padding:20px 16px 20px;border-bottom:1px solid var(--line);}
+  .sidebar .logo-wrap img{width:100%;height:auto;display:block;}
+  .sidebar .logo-sub{font-size:.8rem;font-weight:700;color:var(--ink-2);margin-top:16px;letter-spacing:normal;}
+  .role-tag{display:inline-flex;align-items:center;gap:6px;font-size:.64rem;font-weight:700;border-radius:99px;padding:4px 10px;margin-top:14px;color:var(--ec-maroon);background:#faf1f3;border:1px solid #e5cdd4;}
+  .nav{padding:14px 10px;flex:1;}
+  .nav-group h6{font-size:.66rem;font-weight:600;color:var(--ec-blue);letter-spacing:normal;padding:0 10px 8px;text-transform:uppercase;}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--ink-2);text-decoration:none;font-size:.85rem;margin-bottom:2px;}
+  .nav a:hover{background:#f2f6f9;}
+  .nav a.active{background:#e6f4fb;color:var(--ec-blue-dark);font-weight:600;}
+  .sidebar .user{border-top:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+  .sidebar .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--ec-maroon);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;}
+  .sidebar .user .meta b{font-size:.8rem;display:block;}
+  .sidebar .user .meta span{font-size:.68rem;color:var(--ink-3);}
+
+  .main{flex:1;min-width:0;padding:26px 34px 80px;}
+  .ribbon{display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:700;color:#8a6d00;background:#fdf1c7;border:1px solid #f0dfa0;border-radius:99px;padding:5px 14px;margin-bottom:16px;}
+  h1{font-size:1.8rem;font-weight:800;color:var(--ec-maroon);}
+  .hero{margin-bottom:24px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .sub{font-size:.82rem;color:var(--ink-2);margin:6px 0 0;max-width:48em;line-height:1.6;}
+
+  .principle{
+    margin:16px 0 22px;background:#effaf5;border:1px solid #bfe8d7;border-radius:12px;
+    padding:12px 16px;font-size:.78rem;color:#0c6b48;line-height:1.65;max-width:52em;
+  }
+  .principle b{display:block;margin-bottom:2px;}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:22px;}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .stat .k{font-size:.72rem;color:var(--ink-3);margin-bottom:8px;}
+  .stat .v{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:9px;}
+  .stat .dir{font-size:.95rem;}
+  .up{color:var(--ec-green);} .flat{color:var(--ec-amber);} .down{color:var(--ec-red);}
+  .stat-chart{margin-top:10px;}
+  .stat-chart svg{display:block;}
+
+  h2{font-size:1rem;font-weight:700;margin:26px 0 12px;}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  th,td{text-align:left;padding:12px 16px;font-size:.82rem;border-bottom:1px solid var(--line);}
+  th{font-size:.7rem;letter-spacing:normal;color:var(--ink-3);font-weight:600;background:#fafcfd;}
+  tr:last-child td{border-bottom:none;}
+  .trend{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.8rem;white-space:nowrap;}
+  .dim-split td{background:#f7fdf9;color:#0c6b48;font-size:.7rem;font-weight:700;letter-spacing:normal;padding:8px 16px;}
+  .dim-note{font-size:.72rem;color:var(--ink-2);margin-top:10px;line-height:1.6;max-width:52em;}
+  .trend-cell{display:flex;align-items:center;gap:10px;}
+  .trend-cell .spark{flex-shrink:0;display:block;}
+
+  .trend-overview{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;}
+  .trend-overview h3{font-size:.9rem;font-weight:700;margin-bottom:12px;}
+  .trend-overview svg{display:block;}
+  .ov-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:.72rem;color:var(--ink-2);}
+  .ov-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
+
+  .trial-section{margin-top:26px;}
+  .trial{
+    margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+    display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;
+  }
+  .trial .t-ic{width:44px;height:44px;border-radius:12px;background:#f1edfb;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+  .trial .t-body{flex:1;min-width:240px;}
+  .trial b{font-size:.9rem;display:block;}
+  .trial p{font-size:.78rem;color:var(--ink-2);line-height:1.65;margin-top:5px;}
+  .trial .gate{font-size:.7rem;color:var(--ec-maroon);background:#faf1f3;border:1px solid #e5cdd4;border-radius:99px;padding:4px 11px;display:inline-block;margin-top:9px;}
+  .trial .btns{display:flex;gap:9px;flex-shrink:0;align-self:center;}
+  .trial.progress .t-ic{background:#fdf1c7;}
+  .trial.passed .t-ic{background:#e6f7ef;}
+  .trial.declined .t-ic{background:#fee2e2;}
+  .trial .state-chip{font-size:.68rem;font-weight:700;border-radius:99px;padding:4px 11px;display:inline-block;margin-top:9px;}
+  .trial .state-chip.progress{color:#8a5a00;background:#fdf1c7;}
+  .trial .state-chip.passed{color:#0c6b48;background:#e6f7ef;}
+  .trial .state-chip.declined{color:#b91c1c;background:#fee2e2;}
+  .trial .reason-box{background:#fee2e2;border-radius:8px;padding:9px 12px;margin-top:9px;font-size:.75rem;color:#991b1b;line-height:1.6;width:100%;}
+  .trial .cooldown-note{font-size:.72rem;color:var(--ink-3);margin-top:8px;width:100%;}
+  .btn{border:none;border-radius:10px;padding:10px 17px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;background:var(--ec-blue);color:#fff;transition:background .15s ease;}
+  .btn:not(.ghost):hover{background:var(--ec-blue-dark);}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink-2);font-weight:600;}
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.78rem;padding:9px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;}
+  .toast.show{opacity:.94;}
+  footer.note{margin-top:40px;font-size:.68rem;color:var(--ink-3);text-align:center;}
+  @media (max-width:900px){.sidebar{display:none;}.main{padding:18px;}}
+
+  .role-banner{background:#faf1f3;border-bottom:1px solid #e5cdd4;color:var(--ec-maroon);
+    font-size:.7rem;font-weight:700;letter-spacing:normal;padding:9px 34px;position:sticky;top:0;z-index:50;}
+  .nav-group h6{color:var(--ec-maroon) !important;}
+  .nav a.active{background:#faf1f3 !important;color:var(--ec-maroon) !important;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <img src="edcity_logo.svg" alt="香港教育城 EdCity">
+    <div class="logo-sub">AI 教學工具平台 · POC v0.1</div>
+    <div class="role-tag">📈 科組領導層級 · 科主任視圖</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">
+      <h6>領導視圖</h6>
+      <a href="dept.html" class="active">📈 科組統計</a>
+      <a href="dept-trial-evaluations.html" data-feature="toolTrial">🧪 工具試用評估</a>
+    </div>
+  </nav>
+  <div class="user">
+    <div class="avatar">李</div>
+    <div class="meta"><b>李天佑主任</b><span>中文科科主任</span></div>
+  </div>
+</aside>
+
+<main class="main" style="padding-top:0;">
+<div class="role-banner">領導 ／ 科組層級 — 科主任視圖</div>
+<div style="padding:44px 0 0;">
+  <section class="hero">
+    <div class="ribbon">🟡 提案中 · 此畫面為設計方案，功能未建置</div>
+    <h1>中文科 · 科組統計</h1>
+    <div class="sub">滙總全科五位教師的數據，只顯示<b>趨勢方向</b>（進步／持平／回落），並按年級及技能維度呈現。2025/26 下學期。</div>
+  </section>
+
+  <div class="cards">
+    <div class="stat" data-grade="全科整體" data-series="55,58,61,64,67,70">
+      <div class="k">全科整體趨勢</div><div class="v up"><span class="dir">▲</span>進步中</div>
+      <div class="stat-chart" id="chart-overall"></div>
+    </div>
+    <div class="stat" data-grade="中一級" data-series="50,55,60,65,70,75">
+      <div class="k">中一級</div><div class="v up"><span class="dir">▲</span>進步中</div>
+      <div class="stat-chart" id="chart-s1"></div>
+    </div>
+    <div class="stat" data-grade="中二級" data-series="58,60,57,59,58,60">
+      <div class="k">中二級</div><div class="v flat"><span class="dir">▶</span>大致持平</div>
+      <div class="stat-chart" id="chart-s2"></div>
+    </div>
+    <div class="stat" data-grade="中三級" data-series="62,58,54,50,47,44">
+      <div class="k">中三級</div><div class="v down"><span class="dir">▼</span>需要關注</div>
+      <div class="stat-chart" id="chart-s3"></div>
+    </div>
+  </div>
+
+  <div class="trend-overview" id="deptOverview"></div>
+
+  <h2>技能維度趨勢（全科）</h2>
+  <table>
+    <thead><tr><th>技能維度</th><th>學期趨勢</th><th>備註</th></tr></thead>
+    <tbody>
+      <tr><td>閱讀理解 · 推論</td><td><div class="trend-cell"><span class="spark-slot" data-series="50,54,58,62,66,70" data-dir="up"></span><span class="trend up">▲ 進步中</span></div></td><td>新閱讀計劃重點範疇</td></tr>
+      <tr><td>閱讀理解 · 主旨理解</td><td><div class="trend-cell"><span class="spark-slot" data-series="52,55,58,61,64,67" data-dir="up"></span><span class="trend up">▲ 進步中</span></div></td><td>—</td></tr>
+      <tr><td>寫作 · 段落結構</td><td><div class="trend-cell"><span class="spark-slot" data-series="56,58,55,57,56,58" data-dir="flat"></span><span class="trend flat">▶ 大致持平</span></div></td><td>—</td></tr>
+      <tr><td>語文基礎 · 詞彙運用</td><td><div class="trend-cell"><span class="spark-slot" data-series="60,56,52,48,44,40" data-dir="down"></span><span class="trend down">▼ 需要關注</span></div></td><td>中三級回落較明顯</td></tr>
+      <tr class="dim-split"><td colspan="3">學習持續性 — 與成績並列的成效維度，非附註</td></tr>
+      <tr><td>課外自主閱讀（自願借閱／平台自選篇章）</td><td><div class="trend-cell"><span class="spark-slot" data-series="40,44,48,53,57,61" data-dir="up"></span><span class="trend up">▲ 進步中</span></div></td><td>非考核指標</td></tr>
+      <tr><td>自願重寫／訂正率（沒有分數誘因下）</td><td><div class="trend-cell"><span class="spark-slot" data-series="45,47,44,46,45,47" data-dir="flat"></span><span class="trend flat">▶ 大致持平</span></div></td><td>非考核指標</td></tr>
+    </tbody>
+  </table>
+</div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="feature-flags.js"></script>
+<script>
+guardWholePage('subjectPanelView', '.main');
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1700);}
+
+/* Chart helpers — same approach as insights.html's trend charts (sparkline per
+ * row + a multi-line overview), duplicated locally rather than shared, since
+ * this suite keeps each prototype page self-contained. Colors match this
+ * page's own .up/.flat/.down palette (note: dept.html's --ec-amber flat color
+ * differs slightly from insights.html's, so these are NOT copy-pasted hex
+ * values — they're this file's own root vars, resolved to hex here because
+ * SVG stroke attributes can't reference CSS custom properties directly). */
+const TREND_COLOR = {up:'#00AC6C', flat:'#F5A623', down:'#ED1A2E'};
+
+function sparklineSVG(values, color){
+  const w=86, h=26, pad=3;
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = (max-min) || 1;
+  const stepX = (w-2*pad)/(values.length-1);
+  const y = v => h-pad - ((v-min)/range)*(h-2*pad);
+  const pts = values.map((v,i)=>`${(pad+i*stepX).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const last = values.length-1;
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/>
+    <circle cx="${(pad+last*stepX).toFixed(1)}" cy="${y(values[last]).toFixed(1)}" r="2.4" fill="${color}"/>
+  </svg>`;
+}
+function multiSparklineSVG(seriesList, colors){
+  const w=600, h=150, pad=14;
+  const allVals = seriesList.flat();
+  const min = Math.min(...allVals), max = Math.max(...allVals);
+  const range = (max-min) || 1;
+  const n = seriesList[0].length;
+  const stepX = (w-2*pad)/(n-1);
+  const y = v => h-pad - ((v-min)/range)*(h-2*pad);
+  const grid = [0.25,0.5,0.75].map(f=>{
+    const yy = (pad + (h-2*pad)*f).toFixed(1);
+    return `<line x1="${pad}" y1="${yy}" x2="${w-pad}" y2="${yy}" stroke="#eef2f5" stroke-width="1"/>`;
+  }).join('');
+  const lines = seriesList.map((series,i)=>{
+    const pts = series.map((v,idx)=>`${(pad+idx*stepX).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="2.4"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">${grid}${lines}</svg>`;
+}
+function renderSparkSlots(){
+  document.querySelectorAll('.spark-slot').forEach(el=>{
+    const series = el.dataset.series.split(',').map(Number);
+    el.innerHTML = sparklineSVG(series, TREND_COLOR[el.dataset.dir]);
+  });
+}
+function renderStatCharts(){
+  const cards = document.querySelectorAll('.stat[data-series]');
+  cards.forEach(card=>{
+    const series = card.dataset.series.split(',').map(Number);
+    const dir = card.querySelector('.v').className.replace('v ','').trim();
+    const chartEl = card.querySelector('.stat-chart');
+    if(chartEl) chartEl.innerHTML = sparklineSVG(series, TREND_COLOR[dir]);
+  });
+}
+function renderDeptOverview(){
+  const cards = [...document.querySelectorAll('.stat[data-series]')];
+  const seriesList = cards.map(c=>c.dataset.series.split(',').map(Number));
+  const colors = cards.map(c=>TREND_COLOR[c.querySelector('.v').className.replace('v ','').trim()]);
+  const legend = cards.map((c,i)=>`<span><span class="dot" style="background:${colors[i]}"></span>${c.dataset.grade}</span>`).join('');
+  const chart = multiSparklineSVG(seriesList, colors);
+  document.getElementById('deptOverview').innerHTML = `<h3>學期趨勢走勢 · 全科與各級比較</h3>${chart}<div class="ov-legend">${legend}</div>`;
+}
+renderSparkSlots();
+renderStatCharts();
+renderDeptOverview();
+</script>
+<script src="demo-nav.js"></script>
+</body>
+</html>

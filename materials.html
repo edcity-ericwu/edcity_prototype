@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdCity 教材準備 — 課堂層級三大用例（示意）</title>
+<!-- Site-wide typeface (2026-07-31): Chiron GoRound TC, a rounded
+     Traditional Chinese sans built on Source Han Sans/Chiron Hei HK,
+     replacing the plain system-font stack. Falls back to the previous
+     stack (PingFang TC / Microsoft JhengHei / Noto Sans TC / system) if
+     the network font fails to load. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ec-blue:#008BD1;--ec-blue-dark:#0072ab;--ec-red:#ED1A2E;--ec-green:#00AC6C;
+    --ec-maroon:#7B2539;--ec-amber:#F5A623;--ec-purple:#7C5CDB;
+    --ink:#1e2a35;--ink-2:#55636f;--ink-3:#8a97a3;--line:#e6ebf0;--bg:#f1f2f8;font-size:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Chiron GoRound TC","PingFang TC","Microsoft JhengHei","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg);color:var(--ink);display:flex;min-height:100vh;}
+  .sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+  .sidebar .logo-wrap{padding:20px 16px 20px;border-bottom:1px solid var(--line);}
+  .sidebar .logo-wrap img{width:100%;height:auto;display:block;}
+  .sidebar .logo-sub{font-size:.8rem;font-weight:700;color:var(--ink-2);margin-top:16px;letter-spacing:normal;}
+  .role-chip{display:inline-flex;align-items:center;gap:6px;font-size:.64rem;font-weight:700;color:var(--ec-blue-dark);background:#e6f4fb;border:1px solid #c4e5f5;border-radius:99px;padding:4px 10px;margin-top:14px;}
+  .nav{padding:14px 10px;flex:1;overflow-y:auto;}
+  .nav-group h6{font-size:.66rem;font-weight:600;color:var(--ec-blue);letter-spacing:normal;padding:0 10px 8px;text-transform:uppercase;}
+  .nav-group.governance{background:#f5f3fb;border:1px solid #e8e3f7;border-radius:12px;padding:10px 6px 8px;}
+  .nav-group.governance h6{color:var(--ec-purple,#7C5CDB);}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--ink-2);text-decoration:none;font-size:.85rem;margin-bottom:2px;}
+  .nav a:hover{background:#f2f6f9;}
+  .nav a.active{background:#e6f4fb;color:var(--ec-blue-dark);font-weight:600;}
+  .nav a .ic{width:17px;height:17px;flex-shrink:0;}
+  .sidebar .user{border-top:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .sidebar .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--ec-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;}
+  .sidebar .user .meta b{font-size:.8rem;display:block;}
+  .sidebar .user .meta span{font-size:.68rem;color:var(--ink-3);}
+
+  .main{flex:1;min-width:0;padding:44px 34px 80px;}
+  .ribbon{display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:700;color:#8a6d00;background:#fdf1c7;border:1px solid #f0dfa0;border-radius:99px;padding:5px 14px;margin-bottom:16px;}
+  .hero{margin-bottom:24px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  h1{font-size:1.8rem;font-weight:800;color:var(--ec-blue);}
+  .sub{font-size:.82rem;color:var(--ink-2);margin:6px 0 0;max-width:48em;line-height:1.6;}
+
+  /* Use-case tabs — each with its own identity: icon tile + accent + flow glyph */
+  .uc-tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+  .uc-tab{
+    flex:1;min-width:230px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;cursor:pointer;font-family:inherit;transition:border-color .15s;
+    border-top:3px solid var(--uc,var(--line));
+  }
+  .uc-tab .tab-head{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+  .uc-tab .tile{
+    width:38px;height:38px;border-radius:10px;flex-shrink:0;font-size:1.1rem;
+    display:flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb,var(--uc) 13%,white);
+  }
+  .uc-tab .num{font-size:.62rem;font-weight:700;letter-spacing:normal;color:var(--uc);display:block;}
+  .uc-tab b{display:block;font-size:.88rem;margin-top:2px;color:var(--ink);}
+  .uc-tab .flow{
+    display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:7px 0 6px;
+  }
+  .uc-tab .flow span{
+    font-size:.64rem;font-weight:600;color:var(--ink-2);background:#f5f8fa;
+    border:1px solid var(--line);border-radius:6px;padding:2px 7px;
+  }
+  .uc-tab .flow .arr{background:none;border:none;color:var(--uc);font-weight:800;padding:0 1px;}
+  .uc-tab .flow .out{background:color-mix(in srgb,var(--uc) 12%,white);border-color:color-mix(in srgb,var(--uc) 35%,white);color:var(--uc);}
+  .uc-tab small{font-size:.7rem;color:var(--ink-3);line-height:1.45;display:block;}
+  .uc-tab.on{border-color:var(--uc);box-shadow:0 0 0 2px color-mix(in srgb,var(--uc) 15%,white);}
+
+  .panel{background:#fff;border:1px solid var(--line);border-top:3px solid var(--uc,var(--line));border-radius:16px;padding:22px;display:none;}
+  .panel.show{display:block;}
+  .panel h2{font-size:1rem;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:10px;}
+  .panel h2 .p-tile{
+    width:32px;height:32px;border-radius:9px;font-size:.95rem;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb,var(--uc) 13%,white);
+  }
+  .panel .p-sub{font-size:.76rem;color:var(--ink-2);margin-bottom:16px;line-height:1.6;max-width:46em;}
+
+  .official{
+    background:#e6f4fb;border:1px solid #c4e5f5;border-radius:11px;padding:10px 14px;
+    font-size:.74rem;color:var(--ec-blue-dark);line-height:1.6;margin-bottom:16px;max-width:48em;
+  }
+
+  /* UC1 validate — dual-mode entry (建立教材 pattern) */
+  .mode-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  @media (max-width:700px){.mode-row{grid-template-columns:1fr;}}
+  .mode-card{
+    text-align:left;background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:15px 17px;cursor:pointer;font-family:inherit;display:block;
+  }
+  .mode-card .m-ic{font-size:1.25rem;display:block;margin-bottom:7px;}
+  .mode-card b{display:block;font-size:.84rem;color:var(--ink);margin-bottom:4px;}
+  .mode-card small{font-size:.7rem;color:var(--ink-3);line-height:1.5;display:block;}
+  .mode-card.on{border-color:var(--uc);background:color-mix(in srgb,var(--uc) 5%,white);box-shadow:0 0 0 2px color-mix(in srgb,var(--uc) 15%,white);}
+  .mat{border:1px solid var(--line);border-radius:12px;padding:13px 15px;display:flex;gap:11px;align-items:center;margin-bottom:14px;}
+  .mat .f-ic{font-size:1.3rem;}
+  .mat b{font-size:.82rem;display:block;}
+  .mat small{font-size:.68rem;color:var(--ink-3);}
+  .mat .src-chip{margin-left:auto;font-size:.62rem;font-weight:700;color:var(--ink-2);background:#f5f8fa;border:1px solid var(--line);border-radius:99px;padding:3px 9px;}
+  .check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid #f2f6f8;font-size:.8rem;}
+  .check .st{flex-shrink:0;font-weight:800;width:20px;text-align:center;}
+  .check .st.p{color:var(--ec-green);} .check .st.w{color:#b07c10;} .check .st.i{color:var(--ec-blue);}
+  .check small{display:block;font-size:.7rem;color:var(--ink-3);margin-top:2px;line-height:1.55;}
+  .enrich{display:block;background:#f7fdf9;border:1px solid #bfe8d7;border-radius:10px;padding:10px 13px;margin-top:8px;font-size:.72rem;color:#0c6b48;line-height:1.7;}
+  .check > span:last-child{flex:1;min-width:0;}
+
+  /* UC2 mix */
+  .src-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .schip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 15px;font-size:.76rem;color:var(--ink-2);cursor:pointer;font-family:inherit;display:inline-flex;gap:6px;align-items:center;transition:border-color .15s ease;}
+  .schip:not(.on):hover{border-color:var(--ec-blue);}
+  .schip.on{background:var(--ec-blue);border-color:var(--ec-blue);color:#fff;font-weight:600;}
+  .mix{display:grid;grid-template-columns:1fr 270px;gap:16px;align-items:start;}
+  @media (max-width:1000px){.mix{grid-template-columns:1fr;}}
+  .res{border:1px solid var(--line);border-radius:11px;padding:11px 14px;display:flex;gap:10px;align-items:center;margin-bottom:9px;}
+  .res .r-ic{font-size:1.05rem;flex-shrink:0;}
+  .res b{font-size:.79rem;display:block;}
+  .res small{font-size:.66rem;color:var(--ink-3);}
+  .res .tag{font-size:.6rem;font-weight:700;border-radius:99px;padding:2px 8px;flex-shrink:0;}
+  .tag.edb{color:var(--ec-blue-dark);background:#e6f4fb;border:1px solid #c4e5f5;}
+  .tag.ec{color:var(--ec-green);background:#effaf5;border:1px solid #bfe8d7;}
+  .tag.tb{color:var(--ec-maroon);background:#faf1f3;border:1px solid #e5cdd4;}
+  .tag.ref{color:#b07c10;background:#fdf6ec;border:1px solid #f3e3c3;}
+  .res .add{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 13px;font-size:.7rem;color:var(--ec-blue-dark);font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;}
+  .res .add:hover{border-color:var(--ec-blue);}
+  .res .add:disabled{color:var(--ink-3);cursor:default;}
+  .basket{background:#fafcfd;border:1px solid var(--line);border-radius:13px;padding:15px;position:sticky;top:20px;}
+  .basket h4{font-size:.82rem;font-weight:700;margin-bottom:10px;}
+  .basket .b-item{font-size:.72rem;color:var(--ink-2);padding:6px 0;border-top:1px solid #eef3f6;display:flex;gap:7px;align-items:center;}
+  .basket .b-item .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .basket .empty-b{font-size:.72rem;color:var(--ink-3);padding:8px 0;}
+  .basket .btn{width:100%;margin-top:12px;}
+  .basket .cp{font-size:.64rem;color:var(--ink-3);margin-top:9px;line-height:1.55;}
+  .btn{border:none;border-radius:10px;padding:10px 16px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;background:var(--ec-blue);color:#fff;transition:background .15s ease;}
+  .btn:not(.ghost):hover{background:var(--ec-blue-dark);}
+  .btn:disabled{background:#e6ebf0;color:#8a97a3;cursor:default;}
+
+  /* UC3 cross-subject */
+  .xs-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;font-size:.82rem;}
+  .xs-pill{border:1px solid var(--line);border-radius:99px;padding:8px 18px;background:#fff;font-weight:700;}
+  .xs-pill.chi{color:var(--ec-red);border-color:#f3c2c7;background:#fdf3f4;}
+  .xs-pill.sci{color:var(--ec-green);border-color:#bfe8d7;background:#effaf5;}
+  .xs-plus{color:var(--ink-3);font-weight:800;}
+  .theme-input{flex:1;min-width:220px;border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:.8rem;font-family:inherit;outline:none;}
+  .theme-input:focus{border-color:var(--ec-blue);}
+  .block{border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px;display:flex;gap:11px;align-items:flex-start;}
+  .block .b-tag{font-size:.6rem;font-weight:700;border-radius:99px;padding:3px 9px;flex-shrink:0;margin-top:2px;}
+  .block .b-tag.chi{color:var(--ec-red);background:#fdf3f4;border:1px solid #f3c2c7;}
+  .block .b-tag.sci{color:var(--ec-green);background:#effaf5;border:1px solid #bfe8d7;}
+  .block .b-tag.both{color:var(--ec-purple);background:#f1edfb;border:1px solid #ddd3f5;}
+  .block b{font-size:.8rem;display:block;}
+  .block small{font-size:.7rem;color:var(--ink-3);line-height:1.55;display:block;margin-top:2px;}
+  .xs-pick{
+    display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;
+    border-radius:99px;padding:8px 17px;font-size:.8rem;color:var(--ink-2);cursor:pointer;font-family:inherit;
+  }
+  .xs-pick:hover{border-color:var(--uc);}
+  .xs-pick.on{background:#effaf5;border-color:#bfe8d7;color:var(--ec-green);font-weight:700;}
+  .collab{background:#fdf6ec;border:1px solid #f3e3c3;border-radius:11px;padding:10px 14px;font-size:.73rem;color:#8a6d00;line-height:1.6;margin-top:12px;}
+
+  /* Mock save-to-library flow — a short multi-step sequence (not just a
+   * toast) so "saving" reads as a real pipeline step (store → tag with
+   * provenance/curriculum mapping → done), ending in a real deep-link into
+   * material-library.html carrying the new item's details via query string.
+   * This suite has no cross-page persistence (no localStorage — see
+   * roster.html's note on the same constraint), so the "save" is simulated
+   * one-way: material-library.html reads the query string once on load and
+   * prepends a matching row, tagged 剛剛儲存. */
+  .save-flow{margin-top:12px;background:#f7fdf9;border:1px solid #bfe8d7;border-radius:11px;padding:12px 15px;font-size:.78rem;color:#0c6b48;line-height:1.6;display:none;}
+  .save-flow.show{display:block;}
+  .save-flow .sf-step{display:flex;align-items:center;gap:8px;}
+  .save-flow a.lbtn{display:inline-flex;align-items:center;gap:5px;margin-top:9px;border:1px solid #bfe8d7;background:#fff;border-radius:9px;padding:7px 14px;font-size:.74rem;color:#0c6b48;font-weight:700;text-decoration:none;}
+  .save-flow a.lbtn:hover{border-color:var(--ec-green);}
+
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.78rem;padding:9px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;}
+  .toast.show{opacity:.94;}
+  footer.note{margin-top:40px;font-size:.68rem;color:var(--ink-3);text-align:center;}
+  @media (max-width:900px){.sidebar{display:none;}.main{padding:18px;}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <img src="edcity_logo.svg" alt="香港教育城 EdCity">
+    <div class="logo-sub">教學工具平台 · POC v0.1</div>
+    <div class="role-chip">🧑‍🏫 課堂層級 · 教師視圖</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">
+      <h6>教學工具</h6>
+      <a href="chat.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-9 8.36 8.5 8.5 0 01-3.4-.7L3 21l1.84-5.6A8.38 8.38 0 013.5 11.5a8.5 8.5 0 018.5-8.5 8.38 8.38 0 019 8.5z"/></svg>EdCity.ai</a>
+      <a href="index.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>教學工具</a>
+      <a href="agents.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>Apps／智能代理</a>
+      <a href="materials.html" class="active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>教材準備</a>
+      <a href="material-library.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M4 8v10a2 2 0 002 2h12a2 2 0 002-2V8M10 12h4"/></svg>教材庫</a>
+      <a href="insights.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 5-6"/></svg>班級學習面貌</a>
+      <a href="trial-invites.html" data-feature="toolTrial"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6L4 20a2 2 0 002 2h12a2 2 0 002-2l-5-12V2M9 2h6"/></svg>試用邀請</a>
+    </div>
+  </nav>
+  <div class="user">
+    <div class="avatar">陳</div>
+    <div class="meta"><b>陳凱怡老師</b><span>中文科</span></div>
+  </div>
+</aside>
+
+<main class="main">
+  <section class="hero">
+    <div class="ribbon">🟡 提案中 · 三個入口皆為設計方案，功能未建置</div>
+    <h1>教材準備</h1>
+    <div class="sub">教材準備有三個主要情境：驗證手上已有的教材、從可信來源組合新教材，以及跨科合作創作。三種情境都以官方課程框架為依歸。</div>
+  </section>
+
+  <div class="uc-tabs">
+    <button class="uc-tab on" data-p="p1" style="--uc:var(--ec-blue)" onclick="showUC(this)">
+      <span class="tab-head"><span class="tile">🛡️</span><span><span class="num">用例 1 · 把關</span><b>評估、驗證並充實現有教材。</b></span></span>
+      <div class="flow"><span>📄 你已有的教材</span><span class="arr">→</span><span class="out">✅ 驗證報告＋增潤版</span></div>
+      <small>由<b>一份現有教材</b>開始，平台會按官方課程框架逐項檢查，並提出增潤建議。</small>
+    </button>
+    <button class="uc-tab" data-p="p2" style="--uc:var(--ec-green)" onclick="showUC(this)">
+      <span class="tab-head"><span class="tile">🧺</span><span><span class="num">用例 2 · 組合</span><b>從知識庫選材、混合組卷。</b></span></span>
+      <div class="flow"><span>🏛＋🏫＋📚＋📖 四類來源</span><span class="arr">→</span><span class="out">📝 一份新工作紙</span></div>
+      <small>由<b>零</b>開始，在可信的知識庫中挑選材料，組合成一份新教材。</small>
+    </button>
+    <button class="uc-tab" data-p="p3" style="--uc:var(--ec-purple)" onclick="showUC(this)">
+      <span class="tab-head"><span class="tile">🔗</span><span><span class="num">用例 3 · 跨科</span><b>跨科教材創作。</b></span></span>
+      <div class="flow"><span>中文科＋科學科</span><span class="arr">→</span><span class="out">📘 一份共同教材</span></div>
+      <small>由<b>一個主題</b>開始，兩科教師分工編寫，各自審訂所屬部分。</small>
+    </button>
+  </div>
+
+  <!-- UC1 -->
+  <div class="panel show" id="p1" style="--uc:var(--ec-blue)">
+    <h2><span class="p-tile">🛡️</span>評估・驗證・充實現有教材</h2>
+    <div class="p-sub">無論教材是在教材庫內建立，還是多年來存放在電腦內的 Word 檔，都可以交給平台逐項檢查，並獲得增潤建議。</div>
+    <div class="f-label" style="font-size:.82rem;font-weight:700;margin-bottom:10px;">第一步 · 你的教材在哪裏？</div>
+    <div class="mode-row">
+      <button class="mode-card" id="modePlat" onclick="pickSource('plat')">
+        <span class="m-ic">🗂</span><b>從教材庫選取</b>
+        <small>對於平台內已有的教材，只需直接選取即可，毋須再上載。</small>
+      </button>
+      <button class="mode-card" id="modeUpload" onclick="pickSource('upload')">
+        <span class="m-ic">⬆️</span><b>上載平台外檔案</b>
+        <small>對於多年累積的 Word、PDF 或簡報，上載後同樣會逐項把關，內容不會被改寫。</small>
+      </button>
+    </div>
+
+    <div id="fileStep" style="display:none;">
+      <div class="f-label" style="font-size:.82rem;font-weight:700;margin-bottom:10px;">第二步 · 已選取的教材</div>
+      <div class="mat">
+        <span class="f-ic" id="matIc">📄</span>
+        <span><b id="matName">—</b><small id="matMeta">—</small></span>
+        <span class="src-chip" id="matChip">—</span>
+      </div>
+      <button class="btn" id="checkBtn" onclick="runCheck()">🛡️ 開始檢查（對照官方課程框架）</button>
+    </div>
+
+    <div id="reportStep" style="display:none;">
+    <div class="f-label" style="font-size:.82rem;font-weight:700;margin:18px 0 10px;">第三步 · 檢查結果與增潤建議</div>
+    <div class="check"><span class="st p"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg></span><span>課程對應<small>內容對應中國語文課程「閱讀範疇 3.1／3.2」，與現行課程框架一致</small></span></div>
+    <div class="check"><span class="st p"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg></span><span>事實與文本核對<small>引文與《背影》原文一致，無錯引</small></span></div>
+    <div class="check"><span class="st w">⚠</span><span>年期提示<small>第 4 題引用的課外例子（2018 年新聞）已過時，學生未必有共鳴，建議更換</small></span></div>
+    <div class="check"><span class="st i">✦</span><span>增潤建議<small>如下，全部僅供你選用，不會自動修改你的檔案</small>
+      <span class="enrich">・按三個教學分組各加一條分層提問（增潤／核心／支援）<br>・加入一條開放式問題，讓學生先寫作、後看評語（配合「先讓學生想」的發還設定）<br>・可連結教育城《朱自清散文選讀》配套音頻</span>
+    </span></div>
+    <div style="margin-top:14px;display:flex;gap:9px;">
+      <button class="btn" onclick="saveUC1('enrich')">套用增潤（另存新版）</button>
+      <button class="btn" style="background:#fff;border:1px solid var(--line);color:var(--ink-2);" onclick="saveUC1('report')">只要驗證報告</button>
+    </div>
+    <div class="save-flow" id="saveFlowP1"></div>
+    </div><!-- /reportStep -->
+  </div>
+
+  <!-- UC2 -->
+  <div class="panel" id="p2" style="--uc:var(--ec-green)">
+    <h2><span class="p-tile">🧺</span>知識庫選材・混合組卷</h2>
+    <div class="p-sub">從四類可信來源挑選材料，混合組成一份工作紙或單元教材。每一項材料都會標明出處及使用權限。</div>
+
+    <div class="src-chips">
+      <button class="schip on" data-s="all" onclick="setSrc(this)">全部來源</button>
+      <button class="schip" data-s="edb" onclick="setSrc(this)">🏛 教育局資源</button>
+      <button class="schip" data-s="ec" onclick="setSrc(this)">🏫 教育城資源</button>
+      <button class="schip" data-s="tb" onclick="setSrc(this)">📚 校本授權課本</button>
+      <button class="schip" data-s="ref" onclick="setSrc(this)">📖 參考書</button>
+    </div>
+
+    <div class="mix">
+      <div id="resList"></div>
+      <aside class="basket">
+        <h4>已選材料（<span id="bCount">0</span>）</h4>
+        <div id="bList"><div class="empty-b">尚未選取，按「＋加入」開始組合</div></div>
+        <button class="btn" id="composeBtn" disabled onclick="saveUC2()">組合成工作紙 →</button>
+        <div class="cp">📎 出處自動標註於成品；<b>校本授權課本</b>內容僅限校內使用，不可發佈至公開資源庫。</div>
+        <div class="save-flow" id="saveFlowP2"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- UC3 -->
+  <div class="panel" id="p3" style="--uc:var(--ec-purple)">
+    <h2><span class="p-tile">🔗</span>跨科教材創作</h2>
+    <div class="p-sub">兩科圍繞同一主題共同製作一份教材。每個環節都會標明所屬科目，由該科教師自行審訂。</div>
+
+    <div class="f-label" style="font-size:.82rem;font-weight:700;margin-bottom:10px;">第一步 · 選擇合作科目</div>
+    <div class="xs-row" style="margin-bottom:6px;">
+      <span class="xs-pill chi">中文（你）</span><span class="xs-plus">×</span>
+      <button class="xs-pick on" data-x="sci" onclick="pickPartner(this,'科學')">🔬 科學</button>
+      <button class="xs-pick" data-x="maths" onclick="pickPartner(this,'數學')">🔢 數學</button>
+      <button class="xs-pick" data-x="eng" onclick="pickPartner(this,'英文')">🔤 英文</button>
+    </div>
+
+    <div class="f-label" style="font-size:.82rem;font-weight:700;margin:14px 0 10px;">第二步 · 訂立共同主題</div>
+    <div class="xs-row">
+      <input class="theme-input" id="xsTheme" value="二十四節氣 — 文學意象與地球科學">
+      <button class="btn" id="xsGen" onclick="genOutline()">✨ 生成大綱</button>
+    </div>
+
+    <div id="xsOutline" style="display:none;">
+    <div class="f-label" style="font-size:.82rem;font-weight:700;margin:18px 0 10px;">第三步 · 大綱草稿（每個環節標明所屬科目）</div>
+    <div class="block"><span class="b-tag chi">中文</span><span><b>導入 · 節氣詩詞選讀</b><small>〈清明〉〈立秋〉選段，分析意象：古人如何以文字記錄物候</small></span></div>
+    <div class="block"><span class="b-tag sci">科學</span><span><b>原理 · 地球公轉與太陽直射點</b><small>節氣背後的天文機制，配軌道示意圖與角度計算活動</small></span></div>
+    <div class="block"><span class="b-tag both">跨科</span><span><b>探究 · 詩中物候 vs 今日觀測</b><small>對照詩句描述與香港天文台的當代數據。氣候變遷之下，「清明時節雨紛紛」還準嗎？學生先提出假設，再查證</small></span></div>
+    <div class="block"><span class="b-tag chi">中文</span><span><b>輸出 · 寫一段你的節氣觀察</b><small>以科學觀測作素材、文學筆法作表達；兩科評分準則並列</small></span></div>
+
+    <div class="f-label" style="font-size:.82rem;font-weight:700;margin:18px 0 10px;">第四步 · 兩科共同審訂</div>
+    <div class="collab">🤝 <b>審訂責任：</b>中文環節由你審訂，科學環節則邀請科學科同事負責。跨科教材必須兩科教師都核准，才會發佈。</div>
+    <div style="margin-top:14px;">
+      <button class="btn" id="inviteBtn" onclick="inviteCoReview()">邀請科學科同事共同審訂 →</button>
+    </div>
+    <div class="save-flow" id="saveFlowP3"></div>
+    </div><!-- /xsOutline -->
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script>
+/* UC3 stepped flow: partner → theme → outline → co-review */
+const XS_THEMES = {
+  '科學':'二十四節氣 — 文學意象與地球科學',
+  '數學':'詩詞中的數 — 對仗、格律與數列規律',
+  '英文':'雙語成語對讀 — 中英諺語的文化對照'
+};
+function pickPartner(btn,name){
+  [...btn.parentElement.querySelectorAll('.xs-pick')].forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('xsTheme').value = XS_THEMES[name];
+  document.getElementById('xsOutline').style.display='none';
+  const g=document.getElementById('xsGen'); g.textContent='✨ 生成大綱'; g.disabled=false;
+  toast('合作科目：'+name+'（大綱示例以科學為準）');
+}
+function genOutline(){
+  const g=document.getElementById('xsGen');
+  g.textContent='生成中…'; g.disabled=true;
+  setTimeout(()=>{
+    g.innerHTML=CHECK_SVG+' 已生成';
+    const o=document.getElementById('xsOutline');
+    o.style.display='';
+    o.scrollIntoView?.({behavior:'smooth',block:'nearest'});
+    const inv=document.getElementById('inviteBtn');
+    inv.textContent='邀請科學科同事共同審訂 →'; inv.disabled=false;
+    document.getElementById('saveFlowP3').classList.remove('show');
+    toast('大綱草稿已生成，待兩科教師審訂');
+  }, 800);
+}
+
+/* UC1 three-step flow: pick source → file appears → check reveals report */
+const UC1_FILES = {
+  plat:   {ic:'🗂', name:'《背影》單元教案 v3', meta:'2025 年 11 月建立 · 你的平台工作區 · 曾發佈至校內共享庫', chip:'平台內教材'},
+  upload: {ic:'📄', name:'中二《背影》閱讀理解工作紙.docx', meta:'2019 年建立 · 上次修訂 2023 年 · 由你的電腦上載', chip:'平台外教材'}
+};
+function pickSource(k){
+  document.getElementById('modePlat').classList.toggle('on', k==='plat');
+  document.getElementById('modeUpload').classList.toggle('on', k==='upload');
+  const f = UC1_FILES[k];
+  document.getElementById('matIc').textContent = f.ic;
+  document.getElementById('matName').textContent = f.name;
+  document.getElementById('matMeta').textContent = f.meta;
+  document.getElementById('matChip').textContent = f.chip;
+  document.getElementById('fileStep').style.display = '';
+  document.getElementById('reportStep').style.display = 'none';
+  document.getElementById('saveFlowP1').classList.remove('show');
+  const cb = document.getElementById('checkBtn');
+  cb.textContent = '🛡️ 開始檢查（對照官方課程框架）'; cb.disabled = false;
+  toast(k==='plat' ? '已選取平台內教材（示例）' : '已上載平台外檔案（示例）');
+}
+function runCheck(){
+  const cb = document.getElementById('checkBtn');
+  cb.textContent = '檢查中…'; cb.disabled = true;
+  setTimeout(()=>{
+    cb.innerHTML = CHECK_SVG+' 檢查完成';
+    document.getElementById('reportStep').style.display = '';
+    document.getElementById('saveFlowP1').classList.remove('show');
+    document.getElementById('reportStep').scrollIntoView?.({behavior:'smooth', block:'nearest'});
+    toast('檢查完成：2 項通過、1 項提示、3 項增潤建議');
+  }, 800);
+}
+function showUC(btn){
+  document.querySelectorAll('.uc-tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+  document.getElementById(btn.dataset.p).classList.add('show');
+}
+
+/* UC2 data */
+const RES = [
+  {n:'《背影》課文分析框架', d:'教育局中國語文教學資源 · 2025', s:'edb', ic:'🏛'},
+  {n:'閱讀策略：推論四步法', d:'教育局學與教資源 · 附教學簡報', s:'edb', ic:'🏛'},
+  {n:'散文閱讀理解題庫（中二）', d:'教育城資源庫 · 已對應課程框架', s:'ec', ic:'🏫'},
+  {n:'朱自清散文選讀配套音頻', d:'教育城多媒體資源', s:'ec', ic:'🏫'},
+  {n:'《啟思中國語文》中二上 · 第 3 單元', d:'校本授權課本 · 僅限校內使用', s:'tb', ic:'📚'},
+  {n:'課本單元練習 3.2（附答案）', d:'校本授權課本 · 僅限校內使用', s:'tb', ic:'📚'},
+  {n:'《現代散文鑑賞辭典》相關條目', d:'參考書 · 節錄需標明出處', s:'ref', ic:'📖'},
+];
+let src='all', basket=[];
+const SRC_TAG = {edb:['edb','教育局'], ec:['ec','教育城'], tb:['tb','校本課本'], ref:['ref','參考書']};
+function setSrc(btn){
+  src=btn.dataset.s;
+  document.querySelectorAll('.schip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  renderRes();
+}
+function renderRes(){
+  document.getElementById('resList').innerHTML = RES
+    .filter(r=>src==='all'||r.s===src)
+    .map(r=>{
+      const inB = basket.includes(r.n);
+      return `<div class="res"><span class="r-ic">${r.ic}</span>
+        <span><b>${r.n}</b><small>${r.d}</small></span>
+        <span class="tag ${SRC_TAG[r.s][0]}">${SRC_TAG[r.s][1]}</span>
+        <button class="add" ${inB?'disabled':''} onclick="addRes('${r.n}')">${inB?'已加入 <svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg>':'＋加入'}</button>
+      </div>`;
+    }).join('');
+}
+function addRes(name){
+  if(!basket.includes(name)) basket.push(name);
+  renderRes(); renderBasket();
+  toast('已加入：'+name);
+}
+function renderBasket(){
+  document.getElementById('bCount').textContent = basket.length;
+  document.getElementById('bList').innerHTML = basket.length
+    ? basket.map(n=>{
+        const r = RES.find(x=>x.n===n);
+        return `<div class="b-item"><span class="dot" style="background:var(--ec-${r.s==='edb'?'blue':r.s==='ec'?'green':r.s==='tb'?'maroon':'amber'})"></span>${n}</div>`;
+      }).join('')
+    : '<div class="empty-b">尚未選取，按「＋加入」開始組合</div>';
+  document.getElementById('composeBtn').disabled = basket.length===0;
+}
+/* Mock save-to-library flow, shared by all three use cases. Runs a short
+ * step sequence (rather than an instant toast) so "saved" reads as a real
+ * pipeline — store, then tag with provenance/curriculum mapping — and ends
+ * with a real link into material-library.html carrying the new item's
+ * details in the query string (name/type/tag/usage state), since this suite
+ * has no cross-page persistence to actually push the row there directly. */
+const SAVE_TYPE_LABEL = {report:'驗證報告', sheet:'工作紙', xs:'跨科教材'};
+function runSaveFlow(elId, item){
+  const el = document.getElementById(elId);
+  el.classList.add('show');
+  const steps = ['💾 正在儲存至教材庫…', '🏷 標註出處與課程對應…', 'done'];
+  let i = 0;
+  const tick = () => {
+    if(steps[i] === 'done'){
+      const params = new URLSearchParams({
+        justSaved:'1', name:item.name, type:item.type, t:item.t,
+        usage:item.usage||'未連結課室', state:item.state||'none',
+      });
+      el.innerHTML = `<div class="sf-step"><svg class="ck" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7.4 5.4 10.8 12 3.2"/></svg> 已儲存至教材庫：<b>${item.name}</b>（${SAVE_TYPE_LABEL[item.type]||'工作紙'}）</div>
+        <a class="lbtn" href="material-library.html?${params.toString()}">📚 前往教材庫查看 →</a>`;
+      return;
+    }
+    el.innerHTML = `<div class="sf-step">${steps[i]}</div>`;
+    i++;
+    setTimeout(tick, 650);
+  };
+  tick();
+}
+function saveUC1(kind){
+  const baseName = document.getElementById('matName').textContent;
+  if(kind==='enrich'){
+    runSaveFlow('saveFlowP1', {name:baseName+'（增潤版）', type:'sheet', t:'p1', usage:'未連結課室', state:'none'});
+  } else {
+    runSaveFlow('saveFlowP1', {name:baseName+' · 驗證報告', type:'report', t:'p1', usage:'未連結課室', state:'none'});
+  }
+}
+function saveUC2(){
+  runSaveFlow('saveFlowP2', {name:`組合工作紙（${basket.length} 項來源）`, type:'sheet', t:'p2', usage:'未連結課室', state:'none'});
+}
+function inviteCoReview(){
+  const btn = document.getElementById('inviteBtn');
+  btn.innerHTML = '已邀請 · 待對方審訂 '+CHECK_SVG; btn.disabled = true;
+  toast('已向科學科同事發出共同審訂邀請');
+  const name = document.getElementById('xsTheme').value;
+  runSaveFlow('saveFlowP3', {name, type:'xs', t:'p3', usage:'待科學科同事審訂', state:'pending'});
+}
+
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1500);}
+renderRes();
+
+/* Deep link from 教材庫 (material-library.html?p=p1/p2/p3) — reopen the matching use-case tab */
+(function(){
+  const p = new URLSearchParams(location.search).get('p');
+  if(p && document.getElementById(p)){
+    const btn = document.querySelector('.uc-tab[data-p="'+p+'"]');
+    if(btn) showUC(btn);
+  }
+})();
+</script>
+<script src="usage-modal.js"></script>
+<script src="feature-flags.js"></script>
+<script src="demo-nav.js"></script>
+</body>
+</html>
