@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdCity Ecosystem Maps — Enablement Layer</title>
+<style>
+  :root{
+    --bg:#fafaf8; --card:#ffffff; --card2:#f4f2ec; --card3:#eceae2;
+    --border:#ddd9cc; --border-strong:#c9c4b2;
+    --text:#1a1a2e; --text2:#5c5c56; --text-muted:#8a8a80;
+    --accent:#008BD1; --accent-bg:#e6f4fb; --accent-border:#8fc9ea;
+    --green:#1a7a4c; --green-bg:#e6f5ec; --green-border:#8fd0ac;
+    --amber:#95630a; --amber-bg:#faefdb; --amber-border:#e8bd6f;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .layout{display:flex;min-height:100vh;}
+  nav{width:300px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  nav .brand{padding:0 24px 20px;font-size:20px;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border);margin-bottom:12px;}
+  nav .brand span{display:block;font-size:15px;font-weight:400;color:var(--text-muted);margin-top:2px;}
+  nav button{display:block;width:100%;text-align:left;padding:12px 24px;line-height:1.4;background:none;border:none;font-size:17px;color:var(--text2);cursor:pointer;border-left:3px solid transparent;}
+  nav button:hover{background:var(--card2);}
+  nav button.active{background:var(--accent-bg);color:var(--accent);border-left-color:var(--accent);font-weight:600;}
+  main{flex:1;padding:36px 40px;max-width:920px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  h1{font-size:26px;font-weight:600;margin:0 0 4px;}
+  .subtitle{font-size:17px;color:var(--text2);margin:0 0 24px;}
+  .bet-box{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:12px;padding:16px 18px;margin-bottom:22px;font-size:16px;color:var(--text);line-height:1.6;}
+  .group{background:var(--card2);border-radius:16px;padding:18px 20px;margin-bottom:16px;}
+  .group.core{background:var(--accent-bg);border:1px solid var(--accent-border);}
+  .group-label{font-size:15px;font-weight:600;color:var(--text);margin-bottom:10px;}
+  .group-label .cluster{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.03em;display:block;margin-bottom:2px;}
+  .cap{list-style:none;margin:0;padding:0;}
+  .cap li{font-size:16px;color:var(--text2);margin-top:6px;padding-left:16px;position:relative;line-height:1.45;}
+  .cap li::before{content:"–";position:absolute;left:0;color:var(--border-strong);}
+  .e-tag{font-size:14px;margin-top:8px;color:var(--text-muted);}
+  .center{text-align:center;margin-bottom:14px;}
+  .center .name{font-size:20px;font-weight:600;color:var(--accent);}
+  .center .desc{font-size:16px;color:var(--text2);display:block;}
+  .legend{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+  .legend .k{display:flex;align-items:center;gap:6px;font-size:16px;color:var(--text2);}
+  .legend .sw{width:12px;height:12px;border-radius:3px;display:inline-block;}
+  .legend .sw.evidenced{background:var(--green-bg);border:1px solid var(--green-border);}
+  .legend .sw.partial{background:var(--amber-bg);border:1px solid var(--amber-border);}
+  .legend .sw.theorized{background:var(--card);border:1px dashed var(--border-strong);}
+  .legend .sw.confirmed{background:var(--accent-bg);border:1px solid var(--accent-border);}
+  .conf{color:var(--accent);font-weight:600;}
+  table{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px;}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  th{font-weight:600;color:var(--text2);font-size:15px;text-transform:uppercase;letter-spacing:0.02em;}
+  td.dot{text-align:center;}
+  .dot-e{color:var(--green);font-weight:700;}
+  .dot-p{color:var(--amber);font-weight:700;}
+  .dot-t{color:var(--border-strong);}
+  .count{font-weight:600;}
+  .note{font-size:17px;color:var(--text2);line-height:1.6;margin-top:16px;background:var(--card2);padding:14px 16px;border-radius:10px;}
+  .flow{display:flex;flex-direction:column;align-items:center;gap:0;}
+  .sysbox{width:100%;max-width:560px;border-radius:12px;padding:16px 20px;text-align:center;background:var(--card);border:1px solid var(--border-strong);}
+  .sysbox.hub{background:var(--accent-bg);border-color:var(--accent-border);}
+  .sysbox .sn{font-size:20px;font-weight:600;color:var(--text);}
+  .sysbox.hub .sn{color:var(--accent);}
+  .sysbox .sd{font-size:16px;color:var(--text2);margin-top:2px;}
+  .connector{display:flex;flex-direction:column;align-items:center;padding:8px 0;}
+  .connector .arrow{font-size:22px;color:var(--border-strong);line-height:1;}
+  .connector .clabel{font-size:15px;color:var(--text2);background:var(--card2);padding:3px 10px;border-radius:20px;margin-top:2px;text-align:center;max-width:340px;}
+  .layerbox{width:100%;max-width:560px;border-radius:12px;padding:6px;background:var(--card2);border:1px solid var(--border-strong);}
+  .layer{background:var(--card);border-radius:8px;padding:10px 14px;margin:6px;}
+  .layer .ln{font-size:17px;font-weight:600;}
+  .layer .ld{font-size:15px;color:var(--text2);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="brand">EdCity ecosystem maps<span>Enablement layer, July 2026</span></div>
+  <button data-panel="overview" class="active">Enablement layer across the platform</button>
+  <button data-panel="systems">How the systems connect</button>
+  <button data-panel="ai">EdCity.ai</button>
+  <button data-panel="sms">School Management System</button>
+  <button data-panel="resources">DE Resources Platform</button>
+  <button data-panel="edmarket">EdMarket</button>
+</nav>
+<main>
+
+<div class="panel active" id="overview">
+<h1>Enablement layer across the platform</h1>
+<p class="subtitle">Same panel set as the teacher-first map — Overview, Systems, EdCity.ai, SMS, Resources, EdMarket — so the two can be read side by side, system by system.</p>
+<div class="bet-box">The teacher-first map goes deep on one relationship across four systems. This map goes deep on the eight relationships that make that one possible — governance, operations, and marketplace supply, each shown in the same systems it actually touches.</div>
+<table>
+<tr><th>Actor</th><th>EdCity.ai</th><th>SMS</th><th>Resources</th><th>EdMarket</th><th>Appears in</th></tr>
+<tr><td>Admin / IT</td><td class="dot dot-t">○</td><td class="dot dot-p">◐</td><td class="dot dot-t">○</td><td class="dot dot-p">◐</td><td class="count">4 / 4</td></tr>
+<tr><td>EDB</td><td class="dot dot-t">○</td><td class="dot dot-t">○</td><td class="dot dot-t">○</td><td class="dot dot-t">○</td><td class="count">4 / 4</td></tr>
+<tr><td>Principal</td><td class="dot dot-t">○</td><td class="dot dot-t">○</td><td class="dot dot-t">—</td><td class="dot dot-t">○</td><td class="count">3 / 4</td></tr>
+<tr><td>EdCity SMS team</td><td class="dot dot-t">—</td><td class="dot dot-p">◐</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="count">1 / 4</td></tr>
+<tr><td>EdCity content team</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="dot dot-t">○</td><td class="dot dot-t">—</td><td class="count">1 / 4</td></tr>
+<tr><td>EdMarket gatekeeper</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="dot dot-t">○</td><td class="count">1 / 4</td></tr>
+<tr><td>Data-governance gatekeeper</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="dot dot-t">○</td><td class="count">1 / 4</td></tr>
+<tr><td>Vendor (e.g. Sayo/AAIL)</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="dot dot-t">—</td><td class="dot dot-e">●</td><td class="count">1 / 4</td></tr>
+</table>
+<div class="legend">
+  <div class="k"><span class="dot-e">●</span> Evidenced</div>
+  <div class="k"><span class="dot-p">◐</span> Partly evidenced</div>
+  <div class="k"><span class="dot-t">○</span> Theorized, not researched</div>
+  <div class="k"><span class="dot-t">—</span> Not in this map</div>
+</div>
+<div class="note">
+Admin/IT, EDB, and Principal touch all or nearly all four systems, mirroring how deep the teacher’s own footprint runs — but every one of their touchpoints is indirect or oversight-level, not daily use. The remaining four actors are single-system specialists, matching the same pattern seen among vendor/gatekeeper/content actors in the original ecosystem map.
+</div>
+</div>
+
+<div class="panel" id="systems">
+<h1>How the systems connect</h1>
+<p class="subtitle">Confirmed system architecture — unchanged from the teacher-first map, since this backbone doesn’t depend on who’s using it.</p>
+
+<div class="flow">
+<div class="sysbox hub"><div class="sn">DE Resources Platform</div><div class="sd">Entry point — kept current by the EdCity content team</div></div>
+
+<div class="connector"><span class="arrow">↓</span><span class="clabel">provides access to</span></div>
+
+<div class="sysbox"><div class="sn">EdCity.ai</div><div class="sd">The system every enablement actor either provisions, reports through, or oversees indirectly</div></div>
+
+<div class="connector"><span class="arrow">↓</span><span class="clabel">tool section provides access to</span></div>
+
+<div class="sysbox"><div class="sn">EdMarket</div><div class="sd">Where the marketplace-supply actors — gatekeeper and vendor — actually do their work</div></div>
+
+<div class="connector"><span class="arrow">↓</span><span class="clabel">separately, maintained directly by Admin/IT and the EdCity SMS team</span></div>
+
+<div class="layerbox">
+<div class="layer"><div class="ln">Official records layer</div><div class="ld">→ one-directional: maintained by Admin/IT and the EdCity SMS team, feeds out to EdCity.ai. Not written back to.</div></div>
+<div class="layer"><div class="ln">Performance data layer</div><div class="ld">↔ bidirectional: written to and read by EdCity.ai as teachers and students use it — the SMS team keeps this layer reliable, but doesn’t generate its content.</div></div>
+</div>
+<div class="sysbox" style="margin-top:8px;"><div class="sn">School Management System</div><div class="sd">Two data layers above, maintained internally by the SMS team</div></div>
+</div>
+
+<div class="note">
+This is the same architecture shown in the teacher-first map — the enablement layer is what keeps it running, not a different system underneath it.
+</div>
+</div>
+
+<div class="panel" id="ai">
+<div class="center"><span class="name">EdCity.ai</span><span class="desc">Where enablement actors provision, report, and oversee — not where they work day to day</span></div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Platform Operations</span>Admin / IT</div>
+<ul class="cap">
+<li>Provisions accounts, ensures PDPO compliance</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>Principal</div>
+<ul class="cap">
+<li>Receives efficiency reporting — indirect, not a frequent direct user</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>EDB</div>
+<ul class="cap">
+<li>Sets the mandate; receives aggregate reports — indirect only</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="legend"><div class="k"><span class="sw theorized"></span>Theorized, not researched</div></div>
+</div>
+
+<div class="panel" id="sms">
+<div class="center"><span class="name">School Management System</span><span class="desc">Legacy, security-first, internally maintained — where two enablement actors do their core work</span></div>
+
+<div class="group core">
+<div class="group-label"><span class="cluster">Platform Operations — core</span>Admin / IT</div>
+<ul class="cap">
+<li>Manually maintains student/school records — official records layer only</li>
+</ul>
+<div class="e-tag">Partly evidenced — data-currency risk named, JTBD inferred</div>
+</div>
+
+<div class="group core">
+<div class="group-label"><span class="cluster">Platform Operations — core</span>EdCity SMS team</div>
+<ul class="cap">
+<li>Maintains the legacy system internally — both the official-records and performance-data layers</li>
+</ul>
+<div class="e-tag">Partly evidenced — ownership confirmed, actions inferred</div>
+</div>
+
+<div class="group core">
+<div class="group-label"><span class="cluster">enables</span>EdCity.ai (+ other EdCity services)</div>
+<ul class="cap">
+<li>Writes and reads student performance data — the only bidirectional connection into SMS; does not touch the official-records layer</li>
+</ul>
+<div class="e-tag"><span class="conf">Confirmed system architecture, not theorized</span></div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>Principal</div>
+<ul class="cap">
+<li>No direct access — compliance visibility comes via EdCity.ai, not from SMS directly</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>EDB</div>
+<ul class="cap">
+<li>Indirect only — unconfirmed future data link, not a current system user</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="legend"><div class="k"><span class="sw confirmed"></span>Confirmed system architecture</div><div class="k"><span class="sw partial"></span>Partly evidenced</div><div class="k"><span class="sw theorized"></span>Theorized, not researched</div></div>
+</div>
+
+<div class="panel" id="resources">
+<div class="center"><span class="name">DE Resources Platform</span><span class="desc">News, events, research — kept current by one enablement actor, distributed by another</span></div>
+
+<div class="group core">
+<div class="group-label"><span class="cluster">Platform Operations — core</span>EdCity content team</div>
+<ul class="cap">
+<li>Produces news, updates, and event listings</li>
+</ul>
+<div class="e-tag">Theorized — role confirmed, usage-driven content strategy not yet evidenced</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Platform Operations</span>Admin / IT</div>
+<ul class="cap">
+<li>Distributes event / update info to staff</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>EDB</div>
+<ul class="cap">
+<li>Sets the mandate EdCity aligns its own content to — doesn’t use the platform directly</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="legend"><div class="k"><span class="sw theorized"></span>Theorized, not researched</div></div>
+</div>
+
+<div class="panel" id="edmarket">
+<div class="center"><span class="name">EdMarket</span><span class="desc">Vendor marketplace and relationships — the system where marketplace-supply actors do their core work</span></div>
+
+<div class="group core evidenced">
+<div class="group-label"><span class="cluster">Marketplace &amp; Supply — core</span>Vendor (e.g. Sayo/AAIL)</div>
+<ul class="cap">
+<li>Submits tools, maintains existing EdCity relationship</li>
+</ul>
+<div class="e-tag">Evidenced</div>
+</div>
+
+<div class="group core">
+<div class="group-label"><span class="cluster">Marketplace &amp; Supply — core</span>EdMarket gatekeeper</div>
+<ul class="cap">
+<li>Vets and lists vendor tools</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>Data-governance gatekeeper</div>
+<ul class="cap">
+<li>Decides official-data access for vendors</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Platform Operations</span>Admin / IT</div>
+<ul class="cap">
+<li>Approves and administers school-wide subscriptions to vetted tools — approval auto-enables a tool, no separate setup. Enforces a completed evaluation before a full-department request.</li>
+</ul>
+<div class="e-tag">Partly evidenced — confirmed against the prototype build (subscriptions.html)</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>Principal</div>
+<ul class="cap">
+<li>Approves budget for vendor licensing — the one direct touchpoint in this whole map</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="group">
+<div class="group-label"><span class="cluster">Governance &amp; Oversight</span>EDB</div>
+<ul class="cap">
+<li>Indirect only — Blueprint alignment, conflict-of-interest oversight, not a marketplace user</li>
+</ul>
+<div class="e-tag">Theorized</div>
+</div>
+
+<div class="legend"><div class="k"><span class="sw evidenced"></span>Evidenced</div><div class="k"><span class="sw partial"></span>Partly evidenced</div><div class="k"><span class="sw theorized"></span>Theorized, not researched</div></div>
+</div>
+
+</main>
+</div>
+<script>
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.panel).classList.add('active');
+    location.hash = btn.dataset.panel;
+  });
+});
+if(location.hash){
+  const id = location.hash.slice(1);
+  const btn = document.querySelector('nav button[data-panel="'+id+'"]');
+  if(btn) btn.click();
+}
+</script>
+</body>
+</html>
